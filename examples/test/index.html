@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <style type="text/css">
+
+            body
+            {
+                background-color: #333;
+            }
+
+            #canvas
+            {
+                border: 1px solid #444;
+            }
+
+            #colors
+            {
+                margin-top: 30px;
+            }
+
+            #colors a
+            {
+                display: block;
+                float: left;
+                margin-left: 34px;
+                height: 30px;
+                width: 30px;
+            }
+
+            #colors #red    { background-color: #f00; }
+            #colors #blue   { background-color: #00f; }
+            #colors #green  { background-color: #0f0; }
+            #colors #white  { background-color: #fff; }
+            #colors #purple { background-color: rgb(212, 111, 249); }
+
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="650" height="650"></canvas>
+        <div id="colors">
+            <a id="red"   href="#"></a>
+            <a id="blue"  href="#"></a>
+            <a id="green" href="#"></a>
+            <a id="white" href="#"></a>
+            <a id="purple" href="#"></a>
+        </div>
+        <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
+        <script src="../../src/goldengraphics.js" type="text/javascript"></script>
+
+        <script type="text/javascript">
+            $(function(){
+                var canvas = document.getElementById('canvas');
+                var renderer = new GoldenGraphics.CanvasRenderer(canvas);
+
+                var player = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
+                player.position.x = 50;
+
+                var tshirt = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_01.png');
+                tshirt.opacity = 0.5;
+
+                renderer.stage.addChild(player);
+                renderer.stage.addChild(tshirt);
+
+                function render(){
+                    // window.requestAnimationFrame(render);
+
+                    renderer.render();
+                }
+
+                // render();
+
+
+                setTimeout(render, 200);
+            })
+
+
+        </script>
+    </body>
+</html>
