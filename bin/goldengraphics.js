@@ -345,6 +345,7 @@
       }
 
       this.color = color;
+      this._prevColor = null;
     },
 
     apply: function(origin, target) {
@@ -357,28 +358,43 @@
 
       var _log = "";
 
-      for (var i = 0; i < origin.width; i ++){
-        for (var j = 0; j < origin.height; j ++){
-          var r_0 = origin.data [inpos++];
-          var g_0 = origin.data [inpos++];
-          var b_0 = origin.data [inpos++];
-          var a_0 = origin.data [inpos++];
+      if(!this._prevColor || this._prevColor.r != this.color.r || this._prevColor.g != this.color.g || this._prevColor.b != this.color.b){
+        for (var i = 0; i < origin.width; i ++){
+          for (var j = 0; j < origin.height; j ++){
+            var r_0 = origin.data [inpos++];
+            var g_0 = origin.data [inpos++];
+            var b_0 = origin.data [inpos++];
+            var a_0 = origin.data [inpos++];
 
-          if (a_0 > 0){
-            target.data [pos] = r * origin.data [pos] / 255;
-            pos ++;
-            target.data [pos] = g * origin.data [pos] / 255;
-            pos ++;
-            target.data [pos] = b * origin.data [pos] / 255;
-            pos ++;
-            target.data [pos] = origin.data [pos];
-            pos ++;
-          }
-          else{
-            pos += 4;
+            if (a_0 > 0){
+              target.data [pos] = r * origin.data [pos] / 255;
+              pos ++;
+              target.data [pos] = g * origin.data [pos] / 255;
+              pos ++;
+              target.data [pos] = b * origin.data [pos] / 255;
+              pos ++;
+              target.data [pos] = origin.data [pos];
+              pos ++;
+            }
+            else{
+              pos += 4;
+            }
           }
         }
+
+        if(this._prevColor){
+          this._prevColor.r = this.color.r;
+          this._prevColor.g = this.color.g;
+          this._prevColor.b = this.color.b;
+          this._prevColor.a = this.color.a;
+        }
+        else{
+          this._prevColor = new GoldenGraphics.Color(this.color.r, this.color.g, this.color.b, this.color.a);
+        }
+
+
       }
+
     }
   });
 

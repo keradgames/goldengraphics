@@ -62,12 +62,13 @@
                 var renderer = new GoldenGraphics.CanvasRenderer(canvas);
 
                 var player = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
-                // player.position.x = -180;
+                player.filters = [new GoldenGraphics.filters.TintFilter(130, 50, 0)];
+                // player.position.x = 300;
 
                 var tshirt = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_01.png');
                 // tshirt.position.x = 50;
                 // tshirt.opacity = 0;
-                tshirt.filters = [new GoldenGraphics.filters.TintFilter(130, 0, 0)];
+                tshirt.filters = [new GoldenGraphics.filters.TintFilter(130, 0, 50)];
 
 
                 var tshirt_detail = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_02.png');
