@@ -1,0 +1,2 @@
+  exports.GoldenGraphics = GoldenGraphics;
+})(window);
