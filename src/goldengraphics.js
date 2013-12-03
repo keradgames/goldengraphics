@@ -34,6 +34,7 @@
 
     // draw image in canvas to retrieve image data
 
+    renderer.context.clearRect(0, 0, renderer.canvas.width, renderer.canvas.height);
     renderer.context.drawImage (image, 0,   0);
     imageData = renderer.context.getImageData(0, 0, width, height);
 
@@ -41,6 +42,18 @@
     renderer.render();
 
     return imageData;
+  };
+
+  GoldenGraphics.CanvasRenderer.cloneImageData = function(imageData){
+    var renderer = GoldenGraphics.CanvasRenderer.instance;
+    var clone = renderer.context.createImageData(imageData);
+    var l = clone.data.length;
+
+    for(var i = 0; i < l; i++){
+      clone.data[i] = imageData.data[i];
+    }
+
+    return clone;
   };
 
 
@@ -89,6 +102,8 @@
 
       if(child.opacity > 0 && imageData){
         dataLength = imageData.data.length;
+
+        child.applyFilters();
 
         // for(var j = 0; j < dataLength; j += 4){
         //   pos = j;
@@ -184,9 +199,7 @@
 
     function onImageLoad (){
       _this.cachedImageData = GoldenGraphics.CanvasRenderer.getImageData(this);
-      _this.imageData = _this.cachedImageData;
-
-      console.log(_this.imageData.data[0]);
+      _this.imageData = GoldenGraphics.CanvasRenderer.cloneImageData(_this.cachedImageData);
     }
 
     image.addEventListener("load", onImageLoad);
@@ -203,13 +216,65 @@
     return sprite;
   }
 
+  GoldenGraphics.Sprite.prototype.applyFilters = function(){
+    for(var i = 0; i < this.filters.length; i++){
+      this.filters[i].apply(this.cachedImageData, this.imageData);
+    }
+  }
 
 
+  // FILTERS
 
   GoldenGraphics.filters = {};
 
-  GoldenGraphics.filters.TintFilter = function(color){
+  // TintFilter (color)
+  // TintFilter (r, g, b, a)
 
+  GoldenGraphics.filters.TintFilter = function(){
+    var color = null;
+
+    if(arguments.length == 1){
+      color = arguments[0];
+    }
+    else{
+      color = new GoldenGraphics.Color(arguments[0], arguments[1], arguments[2], arguments[3]);
+    }
+
+    this.color = color;
+  }
+
+  GoldenGraphics.filters.TintFilter.prototype.apply = function(origin, target) {
+    var pos = 0;
+    var inpos = 0;
+
+    var r = this.color.r;
+    var g = this.color.g;
+    var b = this.color.b;
+
+    var _log = "";
+
+    for (var i = 0; i < origin.width; i ++){
+      for (var j = 0; j < origin.height; j ++){
+        var r_0 = origin.data [inpos++];
+        var g_0 = origin.data [inpos++];
+        var b_0 = origin.data [inpos++];
+        var a_0 = origin.data [inpos++];
+
+        if (a_0 > 0){
+          target.data [pos] = r * origin.data [pos] / 255;
+          pos ++;
+          target.data [pos] = g * origin.data [pos] / 255;
+          pos ++;
+          target.data [pos] = b * origin.data [pos] / 255;
+          pos ++;
+          target.data [pos] = origin.data [pos];
+          pos ++;
+        }
+        else{
+          pos += 4;
+        }
+      }
+    }
   }
 
 

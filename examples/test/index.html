@@ -54,24 +54,41 @@
                 var renderer = new GoldenGraphics.CanvasRenderer(canvas);
 
                 var player = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
-                player.position.x = 50;
+                // player.position.x = 150;
 
                 var tshirt = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_01.png');
-                tshirt.opacity = 0.5;
+                // tshirt.position.x = 50;
+                // tshirt.opacity = 0;
+                tshirt.filters = [new GoldenGraphics.filters.TintFilter(130, 0, 0)];
+
+
+                var tshirt_detail = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_02.png');
+                tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
+
 
                 renderer.stage.addChild(player);
                 renderer.stage.addChild(tshirt);
+                renderer.stage.addChild(tshirt_detail);
 
                 function render(){
-                    // window.requestAnimationFrame(render);
+                    window.requestAnimationFrame(render);
 
                     renderer.render();
                 }
 
-                // render();
+                function tweenColorTo(r, g, b){
+                    $(tshirt.filters[0].color).animate({r: r, g: g, b: b}, {duration: 500});
+                }
 
 
-                setTimeout(render, 200);
+                $("#red")   .click(function() { tweenColorTo (130,   0,   0, 1); });
+                $("#blue")  .click(function() { tweenColorTo (  0,   0, 255, 1); });
+                $("#green") .click(function() { tweenColorTo (  0, 255,   0, 1); });
+                $("#white") .click(function() { tweenColorTo (255, 255, 255, 1); });
+                $("#purple").click(function() { tweenColorTo (212, 111, 249, 1); });
+
+
+                render();
             })
 
 
