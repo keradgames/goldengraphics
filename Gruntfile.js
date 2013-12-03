@@ -43,28 +43,23 @@ module.exports = function(grunt) {
         src: '<%= files.build %>',
         dest: '<%= files.min %>'
       }
+    },
+
+    watch: {
+      main : {
+        files: ['<%= dirs.source %>/**/*.js'],
+        tasks: ['concat', 'uglify']
+      }
     }
-    // requirejs: {
-    //   compile: {
-    //     options: {
-    //       name: "GoldenGraphics",
-    //       baseUrl: "<%= dirs.source %>",
-    //       mainConfigFil: "<%= dirs.source %>/config.js",
-    //       out: "<%= dirs.build %>/<%= pkg.name %>.js"
-    //     }
-    //   }
-    // }
   });
 
-  // Load the plugin that provides the "uglify" task.
+  // Load plugins
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  // Load the plugin that provides the "concat" task.
   grunt.loadNpmTasks('grunt-contrib-concat');
-
-  // Load require plugin
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-requirejs');
 
   // Default task(s).
-  grunt.registerTask('default', ['concat', 'uglify']);
+  grunt.registerTask('default', ['concat', 'uglify', 'watch']);
 
 };
