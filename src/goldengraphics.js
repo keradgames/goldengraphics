@@ -82,6 +82,7 @@
     this.imageData = this.renderer.context.createImageData(this.renderer.canvas.width, this.renderer.canvas.height);
 
     var dataLength = 0;
+    var matrixSize = 0;
     var r = 0;
     var g = 0;
     var b = 0;
@@ -90,6 +91,8 @@
     var af = 0;
     var x = 0;
     var y = 0;
+    var pos_x = 0;
+    var pos_y = 0;
 
     var _log = "";
 
@@ -101,63 +104,47 @@
       y = Math.round(child.position.y);
 
       if(child.opacity > 0 && imageData){
-        dataLength = imageData.data.length;
+        matrixSize = this.imageData.data.length - 1;
 
         child.applyFilters();
-
-        // for(var j = 0; j < dataLength; j += 4){
-        //   pos = j;
-        //   r = imageData.data[pos+0];
-        //   g = imageData.data[pos+1];
-        //   b = imageData.data[pos+2];
-        //   a0 = imageData.data[pos+3];
-
-        //   a = a0 / 255; //normaliza alpha between 0 and 1
-
-        //   // check render for pixels with alpha > 0
-        //   if(a > 0){
-        //     af = this.imageData.data[j+3] / 255 || 1;
-
-        //     this.imageData.data [pos] = r * a + (1 - a) * this.imageData.data [pos] * af;
-        //     _log += pos + " " + this.imageData.data [pos] + ", ";
-
-        //     pos ++;
-        //     this.imageData.data [pos] = g * a + (1 - a) * this.imageData.data [pos] * af;
-        //     pos ++;
-        //     this.imageData.data [pos] = b * a + (1 - a) * this.imageData.data [pos] * af;
-        //     pos ++;
-        //     this.imageData.data [pos] = Math.max(a0 * a, this.imageData.data [pos]);
-
-        //   }
-        // }
-
 
         for(var j = 0; j < imageData.width; j++){
           for(var k = 0; k < imageData.height; k++){
             pos = (j * imageData.width + k) * 4;
-            renderPos = ((j + y) * this.imageData.width + (k + x)) * 4;
+            pos_x = k + x;
+            pos_y = j + y;
 
-            r = imageData.data[pos+0];
-            g = imageData.data[pos+1];
-            b = imageData.data[pos+2];
-            a0 = imageData.data[pos+3];
+            // only render pixels inside the screen, avoid mirror effect
+            if(pos_x >= 0 && pos_y >= 0 && pos_x < this.imageData.width && pos_y < this.imageData.height){
+              renderPos = (pos_y * this.imageData.width + pos_x) * 4;
 
-            a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
+              // _log += renderPos + " ,";
 
-            // check render for pixels with alpha > 0
-            if(a > 0){
-              af = this.imageData.data[renderPos+3] / 255 || 1;
+              r = imageData.data[pos+0];
+              g = imageData.data[pos+1];
+              b = imageData.data[pos+2];
+              a0 = imageData.data[pos+3];
 
-              this.imageData.data [renderPos+0] = r * a + (1 - a) * this.imageData.data [renderPos+0] * af;
-              // _log += renderPos + " " + this.imageData.data [renderPos] + ", ";
-              this.imageData.data [renderPos+1] = g * a + (1 - a) * this.imageData.data [renderPos+1] * af;
-              this.imageData.data [renderPos+2] = b * a + (1 - a) * this.imageData.data [renderPos+2] * af;
-              this.imageData.data [renderPos+3] = Math.max(a0 * a, this.imageData.data [renderPos+3]);
+              a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
+
+              // check render for pixels with alpha > 0
+              if(a > 0 && renderPos < matrixSize){
+                af = this.imageData.data[renderPos+3] / 255 || 1;
+
+                this.imageData.data [renderPos+0] = r * a + (1 - a) * this.imageData.data [renderPos+0] * af;
+                // _log += renderPos + " " + this.imageData.data [renderPos] + ", ";
+                this.imageData.data [renderPos+1] = g * a + (1 - a) * this.imageData.data [renderPos+1] * af;
+                this.imageData.data [renderPos+2] = b * a + (1 - a) * this.imageData.data [renderPos+2] * af;
+                this.imageData.data [renderPos+3] = Math.max(a0 * a, this.imageData.data [renderPos+3]);
+              }
             }
           }
         }
       }
+    }
 
+    if(_log && _log.length > 0){
+      console.log(_log);
     }
 
   };
