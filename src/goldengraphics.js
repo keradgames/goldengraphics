@@ -137,8 +137,10 @@
   GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
     init : function(){
       this.children = [];
+      this.filters = [];
       this.imageData = null;
       this.parent = null;
+
     },
 
     addChild : function(child){
@@ -147,27 +149,38 @@
       }
 
       child.parent = this;
-      child.stage = this.stage;
+      this._addChildToStage(child);
     },
 
     removeChild : function(){
       // TODO
     },
 
+    applyFilters: function(){
+      for(var i in this.filters){
+        this.filters[i].apply(this.cachedImageData, this.imageData);
+      }
+    },
+
     // private properties
 
-    _updateImageData: function(){
-      var l = this.children.length;
+    _addChildToStage: function(child){
+      if(child.stage != this.stage){
+        child.stage = this.stage;
+        for(var i in child.children){
+          this._addChildToStage(child.children[i]);
+        }
+      }
+    },
 
+    _updateImageData: function(){
       var pos = 0;
-      var inpos = 0;
       var renderData = null;
+      var childImageData = null;
       var child = null;
-      var imageData = null;
 
       // TODO do not create new image data
-
-      this.imageData = this.renderer.context.createImageData(this.renderer.canvas.width, this.renderer.canvas.height);
+      var renderData = null;
 
       var dataLength = 0;
       var matrixSize = 0;
@@ -184,68 +197,75 @@
 
       var _log = "";
 
-      // for each child
-      for(var i =0; i < l; i++){
-        child = this.children[i];
-        imageData = child.imageData;
-        x = Math.round(child.position.x);
-        y = Math.round(child.position.y);
+      // only update render data for objects in the stage
+      if(this.stage){
+        // for each child
+        for(var i in this.children){
+          renderData = renderData || this.cachedImageData ? this.cachedImageData : this.stage.renderer.context.createImageData(this.stage.renderer.canvas.width, this.stage.renderer.canvas.height);
+          child = this.children[i];
+          childImageData = child.imageData;
 
-        if(child.opacity > 0 && imageData){
-          matrixSize = this.imageData.data.length - 1;
+          x = Math.round(child.position.x);
+          y = Math.round(child.position.y);
 
-          child.applyFilters();
+          if(child.opacity > 0 && childImageData){
+            matrixSize = renderData.data.length - 1;
 
-          for(var j = 0; j < imageData.width; j++){
-            for(var k = 0; k < imageData.height; k++){
-              pos = (j * imageData.width + k) * 4;
-              pos_x = k + x;
-              pos_y = j + y;
+            child._updateImageData();
 
-              // only render pixels inside the screen, avoid mirror effect
-              if(pos_x >= 0 && pos_y >= 0 && pos_x < this.imageData.width && pos_y < this.imageData.height){
-                renderPos = (pos_y * this.imageData.width + pos_x) * 4;
+            for(var j = 0; j < childImageData.width; j++){
+              for(var k = 0; k < childImageData.height; k++){
+                pos = (j * childImageData.width + k) * 4;
+                pos_x = k + x;
+                pos_y = j + y;
 
-                // _log += renderPos + " ,";
+                // only render pixels inside the screen, avoid mirror effect
+                if(pos_x >= 0 && pos_y >= 0 && pos_x < renderData.width && pos_y < renderData.height){
+                  renderPos = (pos_y * renderData.width + pos_x) * 4;
 
-                r = imageData.data[pos+0];
-                g = imageData.data[pos+1];
-                b = imageData.data[pos+2];
-                a0 = imageData.data[pos+3];
+                  // _log += renderPos + " ,";
 
-                a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
+                  r = childImageData.data[pos+0];
+                  g = childImageData.data[pos+1];
+                  b = childImageData.data[pos+2];
+                  a0 = childImageData.data[pos+3];
 
-                // check render for pixels with alpha > 0
-                if(a > 0 && renderPos < matrixSize){
-                  af = this.imageData.data[renderPos+3] / 255 || 1;
+                  a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
 
-                  this.imageData.data [renderPos+0] = r * a + (1 - a) * this.imageData.data [renderPos+0] * af;
-                  // _log += renderPos + " " + this.imageData.data [renderPos] + ", ";
-                  this.imageData.data [renderPos+1] = g * a + (1 - a) * this.imageData.data [renderPos+1] * af;
-                  this.imageData.data [renderPos+2] = b * a + (1 - a) * this.imageData.data [renderPos+2] * af;
-                  this.imageData.data [renderPos+3] = Math.max(a0 * a, this.imageData.data [renderPos+3]);
+                  // check render for pixels with alpha > 0
+                  if(a > 0 && renderPos < matrixSize){
+                    af = renderData.data[renderPos+3] / 255 || 1;
+
+                    renderData.data [renderPos+0] = r * a + (1 - a) * renderData.data [renderPos+0] * af;
+                    // _log += renderPos + " " + renderData.data [renderPos] + ", ";
+                    renderData.data [renderPos+1] = g * a + (1 - a) * renderData.data [renderPos+1] * af;
+                    renderData.data [renderPos+2] = b * a + (1 - a) * renderData.data [renderPos+2] * af;
+                    renderData.data [renderPos+3] = Math.max(a0 * a, renderData.data [renderPos+3]);
+                  }
                 }
               }
             }
           }
         }
-      }
 
-      if(_log && _log.length > 0){
-        console.log(_log);
-      }
+        this.applyFilters();
 
+        if(_log && _log.length > 0){
+          console.log(_log);
+        }
+
+        this.imageData = renderData || this.imageData;
+      }
     }
   })
 
 
   // STAGE
-  // TODO create Display Object Container
-
   GoldenGraphics.Stage = GoldenGraphics.DisplayObjectContainer.extend({
     init : function(renderer){
       this._super();
       this.renderer = renderer;
+      this.stage = this;
     }
   });
 
@@ -300,16 +320,6 @@
       }
 
       image.addEventListener("load", onImageLoad);
-    },
-
-    applyFilters: function(){
-      for(var i = 0; i < this.filters.length; i++){
-        this.filters[i].apply(this.cachedImageData, this.imageData);
-      }
-    },
-
-    addChild: function(child){
-      this.children.push(child);
     }
   });
 
