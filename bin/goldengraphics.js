@@ -1,4 +1,4 @@
-/*! goldengraphics 2013-12-03 */
+/*! goldengraphics 2013-12-04 */
 (function(exports){
   var GoldenGraphics = {};
 
@@ -174,16 +174,37 @@
     },
 
     addChild : function(child){
-      if(this.children.indexOf(child) < 0){
-        this.children.push(child);
-      }
-
-      child.parent = this;
-      this._addChildToStage(child);
+      this.addChildAt(child, this.children.length);
     },
 
-    removeChild : function(){
-      // TODO
+
+
+    addChildAt : function(child, index){
+      if(index > this.children.length){
+        index = this.children.length;
+      }
+
+      if(this.children.indexOf(child) < 0){
+        this.children.splice(index, 0, child);
+        child.parent = this;
+        this._addChildToStage(child);
+      }
+
+    },
+
+    removeChild : function(child){
+      if(this.children.indexOf(child) > -1){
+        this.children.splice(this.children.indexOf(child), 1);
+        this._removeChildFromStage(child);
+        child.parent = null;
+
+        // clear render
+        // this.
+      }
+    },
+
+    contains : function(child){
+      return this.children.indexOf(child) > -1;
     },
 
     applyFilters: function(){
@@ -200,6 +221,13 @@
         for(var i in child.children){
           this._addChildToStage(child.children[i]);
         }
+      }
+    },
+
+    _removeChildFromStage: function(child){
+      child.stage = null;
+      for(var i in child.children){
+        this._removeChildFromstage(child.children[i]);
       }
     },
 

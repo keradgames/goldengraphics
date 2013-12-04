@@ -1,122 +1,133 @@
 <!DOCTYPE html>
 <html>
-    <head>
+  <head>
 
-        <style type="text/css">
+    <style type="text/css">
 
-            body
-            {
-                background-color: #333;
-            }
+      body
+      {
+        background-color: #333;
+      }
 
-            #canvas
-            {
-                border: 1px solid #444;
-            }
+      #canvas
+      {
+        border: 1px solid #444;
+      }
 
-            .colors
-            {
-                padding: 30px;
-                clear: both;
-            }
+      .colors
+      {
+        padding: 30px;
+        clear: both;
+      }
 
-            .colors a
-            {
-                display: block;
-                float: left;
-                margin-left: 34px;
-                height: 30px;
-                width: 30px;
-            }
+      .colors a
+      {
+        display: block;
+        float: left;
+        margin-left: 34px;
+        height: 30px;
+        width: 30px;
+      }
 
-            .colors #red, .colors #red2       { background-color: #f00; }
-            .colors #blue, .colors #blue2     { background-color: #00f; }
-            .colors #green, .colors #green2   { background-color: #0f0; }
-            .colors #white, .colors #white2   { background-color: #fff; }
-            .colors #purple, .colors #purple2 { background-color: rgb(212, 111, 249); }
+      .colors #red, .colors #red2       { background-color: #f00; }
+      .colors #blue, .colors #blue2     { background-color: #00f; }
+      .colors #green, .colors #green2   { background-color: #0f0; }
+      .colors #white, .colors #white2   { background-color: #fff; }
+      .colors #purple, .colors #purple2 { background-color: rgb(212, 111, 249); }
 
-        </style>
-    </head>
-    <body>
-        <canvas id="canvas" width="600" height="400"></canvas>
-        <div class="colors">
-            <a id="red"   href="#"></a>
-            <a id="blue"  href="#"></a>
-            <a id="green" href="#"></a>
-            <a id="white" href="#"></a>
-            <a id="purple" href="#"></a>
-        </div>
-        <div class="colors">
-            <a id="red2"   href="#"></a>
-            <a id="blue2"  href="#"></a>
-            <a id="green2" href="#"></a>
-            <a id="white2" href="#"></a>
-            <a id="purple2" href="#"></a>
-        </div>
-        <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
-        <script src="../../bin/goldengraphics.js" type="text/javascript"></script>
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="600" height="400"></canvas>
+    <div class="colors">
+      <a id="red"   href="#"></a>
+      <a id="blue"  href="#"></a>
+      <a id="green" href="#"></a>
+      <a id="white" href="#"></a>
+      <a id="purple" href="#"></a>
+    </div>
+    <div class="colors">
+      <a id="red2"   href="#"></a>
+      <a id="blue2"  href="#"></a>
+      <a id="green2" href="#"></a>
+      <a id="white2" href="#"></a>
+      <a id="purple2" href="#"></a>
+    </div>
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
+    <script src="../../bin/goldengraphics.js" type="text/javascript"></script>
 
-        <script type="text/javascript">
-            $(function(){
-                var canvas = document.getElementById('canvas');
-                var renderer = new GoldenGraphics.CanvasRenderer(canvas);
+    <script type="text/javascript">
+      $(function(){
+        var canvas = document.getElementById('canvas');
+        var renderer = new GoldenGraphics.CanvasRenderer(canvas);
 
-                var player = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
-                player.filters = [new GoldenGraphics.filters.TintFilter(130, 50, 0)];
-                // player.position.x = 300;
+        var player = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
+        player.filters = [new GoldenGraphics.filters.TintFilter(130, 50, 0)];
+        // player.position.x = 300;
 
-                var tshirt = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_01.png');
-                // tshirt.position.x = 50;
-                // tshirt.opacity = 0;
-                tshirt.filters = [new GoldenGraphics.filters.TintFilter(130, 0, 50)];
-
-
-                var tshirt_detail = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_02.png');
-                tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
+        var tshirt = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_01.png');
+        // tshirt.position.x = 50;
+        // tshirt.opacity = 0;
+        tshirt.filters = [new GoldenGraphics.filters.TintFilter(130, 0, 50)];
 
 
-                renderer.stage.addChild(player);
-                player.addChild(tshirt);
-                player.addChild(tshirt_detail);
-
-                var f = 0;
-
-                function render(){
-                    window.requestAnimationFrame(render);
-
-                    player.position.x = 150 + Math.sin(f / 100) * 150;
+        var tshirt_detail = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_02.png');
+        tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
 
 
-                    renderer.render();
+        renderer.stage.addChild(player);
+        player.addChild(tshirt);
+        player.addChild(tshirt_detail);
 
-                    f++;
-                }
+        var f = 0;
 
-                function tweenColorTo(obj, r, g, b){
-                    if(obj.filters[0]){
-                        $(obj.filters[0].color).animate({r: r, g: g, b: b}, {duration: 500});
-                    }
-                }
+        function render(){
+          window.requestAnimationFrame(render);
 
-
-                $("#red")   .click(function() { tweenColorTo (tshirt, 130,   0,   0, 1); });
-                $("#blue")  .click(function() { tweenColorTo (tshirt,   0,   0, 255, 1); });
-                $("#green") .click(function() { tweenColorTo (tshirt,   0, 255,   0, 1); });
-                $("#white") .click(function() { tweenColorTo (tshirt, 255, 255, 255, 1); });
-                $("#purple").click(function() { tweenColorTo (tshirt, 212, 111, 249, 1); });
+          player.position.x = 150 + Math.sin(f / 100) * 150;
 
 
-                $("#red2")   .click(function() { tweenColorTo (tshirt_detail, 130,   0,   0, 1); });
-                $("#blue2")  .click(function() { tweenColorTo (tshirt_detail,   0,   0, 255, 1); });
-                $("#green2") .click(function() { tweenColorTo (tshirt_detail,   0, 255,   0, 1); });
-                $("#white2") .click(function() { tweenColorTo (tshirt_detail, 255, 255, 255, 1); });
-                $("#purple2").click(function() { tweenColorTo (tshirt_detail, 212, 111, 249, 1); });
+          renderer.render();
+
+          f++;
+        }
+
+        function tweenColorTo(obj, r, g, b){
+          if(obj.filters[0]){
+            $(obj.filters[0].color).animate({r: r, g: g, b: b}, {duration: 500});
+          }
+        }
 
 
-                render();
-            })
+        $("#red")   .click(function() { tweenColorTo (tshirt, 130,   0,   0, 1); });
+        $("#blue")  .click(function() { tweenColorTo (tshirt,   0,   0, 255, 1); });
+        $("#green") .click(function() { tweenColorTo (tshirt,   0, 255,   0, 1); });
+        $("#white") .click(function() { tweenColorTo (tshirt, 255, 255, 255, 1); });
+        $("#purple").click(function() { tweenColorTo (tshirt, 212, 111, 249, 1); });
 
 
-        </script>
-    </body>
+        $("#red2")   .click(function() { tweenColorTo (tshirt_detail, 130,   0,   0, 1); });
+        $("#blue2")  .click(function() { tweenColorTo (tshirt_detail,   0,   0, 255, 1); });
+        $("#green2") .click(function() { tweenColorTo (tshirt_detail,   0, 255,   0, 1); });
+        $("#white2") .click(function() { tweenColorTo (tshirt_detail, 255, 255, 255, 1); });
+        $("#purple2").click(function() { tweenColorTo (tshirt_detail, 212, 111, 249, 1); });
+
+
+        render();
+
+        // setInterval(function(){
+        //   if(player.contains(tshirt_detail)){
+        //     player.removeChild(tshirt_detail);
+        //   }
+        //   else{
+        //     player.addChild(tshirt_detail);
+        //   }
+
+        //   console.log(player.children.length);
+        // }, 5000);
+      })
+
+
+    </script>
+  </body>
 </html>
