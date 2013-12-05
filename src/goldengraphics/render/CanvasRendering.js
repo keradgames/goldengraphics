@@ -11,11 +11,17 @@
       // clear canvas
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      this._updateImageData(stage);
+      if(stage){
+        this._updateImageData(stage);
 
-      if(stage.imageData){
-        this.context.putImageData(stage.imageData, 0, 0);
+        if(stage.imageData){
+          this.context.putImageData(stage.imageData, 0, 0);
+        }
       }
+      else{
+        console.log('Stage is not defined');
+      }
+
     },
 
     _updateImageData: function(displayObject){

@@ -82,7 +82,7 @@
 
         var f = 0;
 
-        function render(){
+        window.render = function(){
           // window.requestAnimationFrame(render);
 
           // player.position.x = 150 + Math.sin(f / 100) * 150;
@@ -115,7 +115,8 @@
 
 
         render();
-        setTimeout(render, 2000);
+        setTimeout(render, 1000);
+        setTimeout(render, 1001);
 
         // setInterval(function(){
         //   if(player.contains(tshirt_detail)){
