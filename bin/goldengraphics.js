@@ -1,4 +1,4 @@
-/*! goldengraphics 2013-12-04 */
+/*! goldengraphics 2013-12-05 */
 (function(exports){
   var GoldenGraphics = {};
 
@@ -110,57 +110,160 @@
     init: function(canvas){
       this.canvas = canvas;
       this.context = this.canvas.getContext("2d");
-      this.stage = new GoldenGraphics.Stage(this);
       this.imageData = this.context.createImageData(this.canvas.width, this.canvas.height);
-
-      GoldenGraphics.CanvasRenderer.instance = this;
     },
 
-    render: function() {
+    render: function(stage) {
       // clear canvas
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      this.stage._updateImageData();
+      this._updateImageData(stage);
 
-      if(this.stage.imageData){
-        this.context.putImageData(this.stage.imageData, 0, 0);
+      if(stage.imageData){
+        this.context.putImageData(stage.imageData, 0, 0);
       }
+    },
+
+    _updateImageData: function(displayObject){
+      var pos = 0;
+      var renderData = null;
+      var childImageData = null;
+      var child = null;
+
+      // TODO do not create new image data
+      var renderData = null;
+
+      var dataLength = 0;
+      var matrixSize = 0;
+      var r = 0;
+      var g = 0;
+      var b = 0;
+      var a = 0;
+      var a0 = 0;
+      var af = 0;
+      var x = 0;
+      var y = 0;
+      var pos_x = 0;
+      var pos_y = 0;
+
+      var _log = "";
+
+      // only update render data for objects in the stage
+      if(displayObject && displayObject.stage){
+        if(!displayObject.cachedImageData){
+          this._cacheImageData(displayObject);
+        }
+
+        // for each child
+        for(var i in displayObject.children){
+          if(displayObject.children.hasOwnProperty(i)){
+            renderData = renderData || displayObject.cachedImageData ? displayObject.cachedImageData : this.context.createImageData(this.canvas.width, this.canvas.height);
+            child = displayObject.children[i];
+
+
+            if(child.texture && !child.cachedImageData){
+              this._cacheImageData(child);
+            }
+
+
+            childImageData = child.imageData;
+
+            x = Math.round(child.position.x);
+            y = Math.round(child.position.y);
+
+            if(child.opacity > 0 && childImageData){
+              matrixSize = renderData.data.length - 1;
+
+              this._updateImageData(child);
+
+              for(var j = 0; j < childImageData.width; j++){
+                for(var k = 0; k < childImageData.height; k++){
+                  pos = (j * childImageData.width + k) * 4;
+                  pos_x = k + x;
+                  pos_y = j + y;
+
+                  // only render pixels inside the screen, avoid mirror effect
+                  if(pos_x >= 0 && pos_y >= 0 && pos_x < renderData.width && pos_y < renderData.height){
+                    renderPos = (pos_y * renderData.width + pos_x) * 4;
+
+                    // _log += renderPos + " ,";
+
+                    r = childImageData.data[pos+0];
+                    g = childImageData.data[pos+1];
+                    b = childImageData.data[pos+2];
+                    a0 = childImageData.data[pos+3];
+
+                    a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
+
+                    // check render for pixels with alpha > 0
+                    if(a > 0 && renderPos < matrixSize){
+                      af = renderData.data[renderPos+3] / 255 || 1;
+
+                      renderData.data [renderPos+0] = r * a + (1 - a) * renderData.data [renderPos+0] * af;
+                      // _log += renderPos + " " + renderData.data [renderPos] + ", ";
+                      renderData.data [renderPos+1] = g * a + (1 - a) * renderData.data [renderPos+1] * af;
+                      renderData.data [renderPos+2] = b * a + (1 - a) * renderData.data [renderPos+2] * af;
+                      renderData.data [renderPos+3] = Math.max(a0 * a, renderData.data [renderPos+3]);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        displayObject.applyFilters();
+
+        if(_log && _log.length > 0){
+          console.log(_log);
+        }
+
+        displayObject.imageData = renderData || displayObject.imageData;
+      }
+    },
+
+    _cacheImageData: function(displayObject){
+      if(displayObject.texture){
+        displayObject.cachedImageData = this.getImageData(displayObject.texture);
+        displayObject.imageData = this.cloneImageData(displayObject.cachedImageData);
+      }
+    },
+
+    getImageData: function(image){
+      var imageData = null;
+      var width = image.width;
+      var height = image.height;
+
+      // draw image in canvas to retrieve image data
+
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.context.drawImage (image, 0,   0);
+      imageData = this.context.getImageData(0, 0, width, height);
+
+      // clear canvas after caching image
+
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // restore previous render
+      // this.render();
+
+      return imageData;
+    },
+
+    cloneImageData: function(imageData){
+      var clone = this.context.createImageData(imageData);
+      var l = clone.data.length;
+
+      for(var i = 0; i < l; i++){
+        clone.data[i] = imageData.data[i];
+      }
+
+      return clone;
     }
   });
 
   // Static functions and properties
 
-  GoldenGraphics.CanvasRenderer.instance = null;
-
-  GoldenGraphics.CanvasRenderer.getImageData = function(image){
-    var renderer = GoldenGraphics.CanvasRenderer.instance;
-    var imageData = null;
-    var width = image.width;
-    var height = image.height;
-
-    // draw image in canvas to retrieve image data
-
-    renderer.context.clearRect(0, 0, renderer.canvas.width, renderer.canvas.height);
-    renderer.context.drawImage (image, 0,   0);
-    imageData = renderer.context.getImageData(0, 0, width, height);
-
-    // restore previous render
-    renderer.render();
-
-    return imageData;
-  };
-
-  GoldenGraphics.CanvasRenderer.cloneImageData = function(imageData){
-    var renderer = GoldenGraphics.CanvasRenderer.instance;
-    var clone = renderer.context.createImageData(imageData);
-    var l = clone.data.length;
-
-    for(var i = 0; i < l; i++){
-      clone.data[i] = imageData.data[i];
-    }
-
-    return clone;
-  };
 
 // DISPLAY OBJECT CONTAINER
 
@@ -209,7 +312,9 @@
 
     applyFilters: function(){
       for(var i in this.filters){
-        this.filters[i].apply(this.cachedImageData, this.imageData);
+        if(this.filters.hasOwnProperty(i)){
+          this.filters[i].apply(this.cachedImageData, this.imageData);
+        }
       }
     },
 
@@ -219,7 +324,9 @@
       if(child.stage != this.stage){
         child.stage = this.stage;
         for(var i in child.children){
-          this._addChildToStage(child.children[i]);
+          if(child.children.hasOwnProperty(i)){
+            this._addChildToStage(child.children[i]);
+          }
         }
       }
     },
@@ -227,7 +334,9 @@
     _removeChildFromStage: function(child){
       child.stage = null;
       for(var i in child.children){
-        this._removeChildFromstage(child.children[i]);
+        if(child.children.hasOwnProperty(i)){
+          this._removeChildFromstage(child.children[i]);
+        }
       }
     },
 
@@ -259,46 +368,48 @@
       if(this.stage){
         // for each child
         for(var i in this.children){
-          renderData = renderData || this.cachedImageData ? this.cachedImageData : this.stage.renderer.context.createImageData(this.stage.renderer.canvas.width, this.stage.renderer.canvas.height);
-          child = this.children[i];
-          childImageData = child.imageData;
+          if(this.children.hasOwnProperty(i)){
+            renderData = renderData || this.cachedImageData ? this.cachedImageData : this.stage.renderer.context.createImageData(this.stage.renderer.canvas.width, this.stage.renderer.canvas.height);
+            child = this.children[i];
+            childImageData = child.imageData;
 
-          x = Math.round(child.position.x);
-          y = Math.round(child.position.y);
+            x = Math.round(child.position.x);
+            y = Math.round(child.position.y);
 
-          if(child.opacity > 0 && childImageData){
-            matrixSize = renderData.data.length - 1;
+            if(child.opacity > 0 && childImageData){
+              matrixSize = renderData.data.length - 1;
 
-            child._updateImageData();
+              child._updateImageData();
 
-            for(var j = 0; j < childImageData.width; j++){
-              for(var k = 0; k < childImageData.height; k++){
-                pos = (j * childImageData.width + k) * 4;
-                pos_x = k + x;
-                pos_y = j + y;
+              for(var j = 0; j < childImageData.width; j++){
+                for(var k = 0; k < childImageData.height; k++){
+                  pos = (j * childImageData.width + k) * 4;
+                  pos_x = k + x;
+                  pos_y = j + y;
 
-                // only render pixels inside the screen, avoid mirror effect
-                if(pos_x >= 0 && pos_y >= 0 && pos_x < renderData.width && pos_y < renderData.height){
-                  renderPos = (pos_y * renderData.width + pos_x) * 4;
+                  // only render pixels inside the screen, avoid mirror effect
+                  if(pos_x >= 0 && pos_y >= 0 && pos_x < renderData.width && pos_y < renderData.height){
+                    renderPos = (pos_y * renderData.width + pos_x) * 4;
 
-                  // _log += renderPos + " ,";
+                    // _log += renderPos + " ,";
 
-                  r = childImageData.data[pos+0];
-                  g = childImageData.data[pos+1];
-                  b = childImageData.data[pos+2];
-                  a0 = childImageData.data[pos+3];
+                    r = childImageData.data[pos+0];
+                    g = childImageData.data[pos+1];
+                    b = childImageData.data[pos+2];
+                    a0 = childImageData.data[pos+3];
 
-                  a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
+                    a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
 
-                  // check render for pixels with alpha > 0
-                  if(a > 0 && renderPos < matrixSize){
-                    af = renderData.data[renderPos+3] / 255 || 1;
+                    // check render for pixels with alpha > 0
+                    if(a > 0 && renderPos < matrixSize){
+                      af = renderData.data[renderPos+3] / 255 || 1;
 
-                    renderData.data [renderPos+0] = r * a + (1 - a) * renderData.data [renderPos+0] * af;
-                    // _log += renderPos + " " + renderData.data [renderPos] + ", ";
-                    renderData.data [renderPos+1] = g * a + (1 - a) * renderData.data [renderPos+1] * af;
-                    renderData.data [renderPos+2] = b * a + (1 - a) * renderData.data [renderPos+2] * af;
-                    renderData.data [renderPos+3] = Math.max(a0 * a, renderData.data [renderPos+3]);
+                      renderData.data [renderPos+0] = r * a + (1 - a) * renderData.data [renderPos+0] * af;
+                      // _log += renderPos + " " + renderData.data [renderPos] + ", ";
+                      renderData.data [renderPos+1] = g * a + (1 - a) * renderData.data [renderPos+1] * af;
+                      renderData.data [renderPos+2] = b * a + (1 - a) * renderData.data [renderPos+2] * af;
+                      renderData.data [renderPos+3] = Math.max(a0 * a, renderData.data [renderPos+3]);
+                    }
                   }
                 }
               }
@@ -318,9 +429,8 @@
   })
   // STAGE
   GoldenGraphics.Stage = GoldenGraphics.DisplayObjectContainer.extend({
-    init : function(renderer){
+    init : function(){
       this._super();
-      this.renderer = renderer;
       this.stage = this;
     }
   });
@@ -335,10 +445,10 @@
       this.position = new GoldenGraphics.Point2D();
       this.filters = [];
       this.opacity = 1;
+      this.texture = null;
 
       function onImageLoad (){
-        _this.cachedImageData = GoldenGraphics.CanvasRenderer.getImageData(this);
-        _this.imageData = GoldenGraphics.CanvasRenderer.cloneImageData(_this.cachedImageData);
+        _this.texture = this;
       }
 
       image.addEventListener("load", onImageLoad);

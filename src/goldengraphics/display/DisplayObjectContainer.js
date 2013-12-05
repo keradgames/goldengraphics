@@ -45,7 +45,9 @@
 
     applyFilters: function(){
       for(var i in this.filters){
-        this.filters[i].apply(this.cachedImageData, this.imageData);
+        if(this.filters.hasOwnProperty(i)){
+          this.filters[i].apply(this.cachedImageData, this.imageData);
+        }
       }
     },
 
@@ -55,7 +57,9 @@
       if(child.stage != this.stage){
         child.stage = this.stage;
         for(var i in child.children){
-          this._addChildToStage(child.children[i]);
+          if(child.children.hasOwnProperty(i)){
+            this._addChildToStage(child.children[i]);
+          }
         }
       }
     },
@@ -63,7 +67,9 @@
     _removeChildFromStage: function(child){
       child.stage = null;
       for(var i in child.children){
-        this._removeChildFromstage(child.children[i]);
+        if(child.children.hasOwnProperty(i)){
+          this._removeChildFromstage(child.children[i]);
+        }
       }
     },
 
@@ -95,46 +101,48 @@
       if(this.stage){
         // for each child
         for(var i in this.children){
-          renderData = renderData || this.cachedImageData ? this.cachedImageData : this.stage.renderer.context.createImageData(this.stage.renderer.canvas.width, this.stage.renderer.canvas.height);
-          child = this.children[i];
-          childImageData = child.imageData;
+          if(this.children.hasOwnProperty(i)){
+            renderData = renderData || this.cachedImageData ? this.cachedImageData : this.stage.renderer.context.createImageData(this.stage.renderer.canvas.width, this.stage.renderer.canvas.height);
+            child = this.children[i];
+            childImageData = child.imageData;
 
-          x = Math.round(child.position.x);
-          y = Math.round(child.position.y);
+            x = Math.round(child.position.x);
+            y = Math.round(child.position.y);
 
-          if(child.opacity > 0 && childImageData){
-            matrixSize = renderData.data.length - 1;
+            if(child.opacity > 0 && childImageData){
+              matrixSize = renderData.data.length - 1;
 
-            child._updateImageData();
+              child._updateImageData();
 
-            for(var j = 0; j < childImageData.width; j++){
-              for(var k = 0; k < childImageData.height; k++){
-                pos = (j * childImageData.width + k) * 4;
-                pos_x = k + x;
-                pos_y = j + y;
+              for(var j = 0; j < childImageData.width; j++){
+                for(var k = 0; k < childImageData.height; k++){
+                  pos = (j * childImageData.width + k) * 4;
+                  pos_x = k + x;
+                  pos_y = j + y;
 
-                // only render pixels inside the screen, avoid mirror effect
-                if(pos_x >= 0 && pos_y >= 0 && pos_x < renderData.width && pos_y < renderData.height){
-                  renderPos = (pos_y * renderData.width + pos_x) * 4;
+                  // only render pixels inside the screen, avoid mirror effect
+                  if(pos_x >= 0 && pos_y >= 0 && pos_x < renderData.width && pos_y < renderData.height){
+                    renderPos = (pos_y * renderData.width + pos_x) * 4;
 
-                  // _log += renderPos + " ,";
+                    // _log += renderPos + " ,";
 
-                  r = childImageData.data[pos+0];
-                  g = childImageData.data[pos+1];
-                  b = childImageData.data[pos+2];
-                  a0 = childImageData.data[pos+3];
+                    r = childImageData.data[pos+0];
+                    g = childImageData.data[pos+1];
+                    b = childImageData.data[pos+2];
+                    a0 = childImageData.data[pos+3];
 
-                  a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
+                    a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
 
-                  // check render for pixels with alpha > 0
-                  if(a > 0 && renderPos < matrixSize){
-                    af = renderData.data[renderPos+3] / 255 || 1;
+                    // check render for pixels with alpha > 0
+                    if(a > 0 && renderPos < matrixSize){
+                      af = renderData.data[renderPos+3] / 255 || 1;
 
-                    renderData.data [renderPos+0] = r * a + (1 - a) * renderData.data [renderPos+0] * af;
-                    // _log += renderPos + " " + renderData.data [renderPos] + ", ";
-                    renderData.data [renderPos+1] = g * a + (1 - a) * renderData.data [renderPos+1] * af;
-                    renderData.data [renderPos+2] = b * a + (1 - a) * renderData.data [renderPos+2] * af;
-                    renderData.data [renderPos+3] = Math.max(a0 * a, renderData.data [renderPos+3]);
+                      renderData.data [renderPos+0] = r * a + (1 - a) * renderData.data [renderPos+0] * af;
+                      // _log += renderPos + " " + renderData.data [renderPos] + ", ";
+                      renderData.data [renderPos+1] = g * a + (1 - a) * renderData.data [renderPos+1] * af;
+                      renderData.data [renderPos+2] = b * a + (1 - a) * renderData.data [renderPos+2] * af;
+                      renderData.data [renderPos+3] = Math.max(a0 * a, renderData.data [renderPos+3]);
+                    }
                   }
                 }
               }

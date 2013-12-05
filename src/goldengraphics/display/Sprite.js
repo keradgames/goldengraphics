@@ -9,10 +9,10 @@
       this.position = new GoldenGraphics.Point2D();
       this.filters = [];
       this.opacity = 1;
+      this.texture = null;
 
       function onImageLoad (){
-        _this.cachedImageData = GoldenGraphics.CanvasRenderer.getImageData(this);
-        _this.imageData = GoldenGraphics.CanvasRenderer.cloneImageData(_this.cachedImageData);
+        _this.texture = this;
       }
 
       image.addEventListener("load", onImageLoad);

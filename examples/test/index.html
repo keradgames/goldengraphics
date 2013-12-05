@@ -60,6 +60,7 @@
       $(function(){
         var canvas = document.getElementById('canvas');
         var renderer = new GoldenGraphics.CanvasRenderer(canvas);
+        var stage = new GoldenGraphics.Stage();
 
         var player = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
         player.filters = [new GoldenGraphics.filters.TintFilter(130, 50, 0)];
@@ -75,26 +76,26 @@
         tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
 
 
-        renderer.stage.addChild(player);
+        stage.addChild(player);
         player.addChild(tshirt);
         player.addChild(tshirt_detail);
 
         var f = 0;
 
         function render(){
-          window.requestAnimationFrame(render);
+          // window.requestAnimationFrame(render);
 
-          player.position.x = 150 + Math.sin(f / 100) * 150;
+          // player.position.x = 150 + Math.sin(f / 100) * 150;
 
 
-          renderer.render();
+          renderer.render(stage);
 
           f++;
         }
 
         function tweenColorTo(obj, r, g, b){
           if(obj.filters[0]){
-            $(obj.filters[0].color).animate({r: r, g: g, b: b}, {duration: 500});
+            $(obj.filters[0].color).animate({r: r, g: g, b: b}, {duration: 500, step:render, complete: render});
           }
         }
 
@@ -114,6 +115,7 @@
 
 
         render();
+        setTimeout(render, 2000);
 
         // setInterval(function(){
         //   if(player.contains(tshirt_detail)){

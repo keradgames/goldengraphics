@@ -1,6 +1,6 @@
 {
   "name": "goldengraphics",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Graphics Library by Kerad Games",
   "main": "bin/goldengraphics.js",
   "directories": {

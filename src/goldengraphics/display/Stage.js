@@ -1,8 +1,7 @@
   // STAGE
   GoldenGraphics.Stage = GoldenGraphics.DisplayObjectContainer.extend({
-    init : function(renderer){
+    init : function(){
       this._super();
-      this.renderer = renderer;
       this.stage = this;
     }
   });
