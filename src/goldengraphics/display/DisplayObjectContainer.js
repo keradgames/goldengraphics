@@ -45,14 +45,6 @@
       return this.children.indexOf(child) > -1;
     },
 
-    applyFilters: function(){
-      for(var i in this.filters){
-        if(this.filters.hasOwnProperty(i)){
-          this.filters[i].apply(this.cachedImageData, this.imageData);
-        }
-      }
-    },
-
     // private properties
 
     _addChildToStage: function(child){

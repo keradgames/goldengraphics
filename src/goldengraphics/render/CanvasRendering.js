@@ -1,8 +1,8 @@
 // RENDERING
 
   GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
-    init: function(canvas){
-      this.canvas = canvas;
+    init: function(){
+      this.canvas = document.createElement('canvas');
       this.context = this.canvas.getContext("2d");
       this.imageData = this.context.createImageData(this.canvas.width, this.canvas.height);
     },
@@ -22,6 +22,11 @@
         console.log('Stage is not defined');
       }
 
+    },
+
+    resize : function(width, height){
+      this.canvas.width = width;
+      this.canvas.height = height;
     },
 
     _updateImageData: function(displayObject){
@@ -116,7 +121,7 @@
           }
         }
 
-        displayObject.applyFilters();
+        this._applyFilters(displayObject);
 
         if(_log && _log.length > 0){
           console.log(_log);
@@ -130,6 +135,16 @@
       if(displayObject.texture){
         displayObject.cachedImageData = this.getImageData(displayObject.texture);
         displayObject.imageData = this.cloneImageData(displayObject.cachedImageData);
+      }
+    },
+
+    _applyFilters : function(displayObject){
+      if(displayObject.cachedImageData && displayObject.imageData){
+        for(var i in displayObject.filters){
+          if(displayObject.filters.hasOwnProperty(i)){
+            displayObject.filters[i].apply(displayObject.cachedImageData, displayObject.imageData);
+          }
+        }
       }
     },
 

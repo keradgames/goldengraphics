@@ -9,7 +9,7 @@
         background-color: #333;
       }
 
-      #canvas
+      canvas
       {
         border: 1px solid #444;
       }
@@ -38,7 +38,7 @@
     </style>
   </head>
   <body>
-    <canvas id="canvas" width="600" height="400"></canvas>
+    <div id="canvas-container"></div>
     <div class="colors">
       <a id="red"   href="#"></a>
       <a id="blue"  href="#"></a>
@@ -58,9 +58,13 @@
 
     <script type="text/javascript">
       $(function(){
-        var canvas = document.getElementById('canvas');
-        var renderer = new GoldenGraphics.CanvasRenderer(canvas);
+        var renderer = new GoldenGraphics.CanvasRenderer();
         var stage = new GoldenGraphics.Stage();
+        window.renderer = renderer;
+
+        document.getElementById('canvas-container').appendChild(renderer.canvas);
+
+        renderer.resize(600, 400);
 
         var player = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
         player.filters = [new GoldenGraphics.filters.TintFilter(130, 50, 0)];
@@ -128,6 +132,7 @@
 
         //   console.log(player.children.length);
         // }, 5000);
+
       })
 
 
