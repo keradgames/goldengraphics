@@ -57,7 +57,9 @@
         // for each child
         for(var i in displayObject.children){
           if(displayObject.children.hasOwnProperty(i)){
-            renderData = renderData || displayObject.cachedImageData ? displayObject.cachedImageData : this.context.createImageData(this.canvas.width, this.canvas.height);
+            if(!renderData){
+              renderData = displayObject.cachedImageData ? displayObject.cachedImageData : this.context.createImageData(this.canvas.width, this.canvas.height);
+            }
             child = displayObject.children[i];
 
 
@@ -65,45 +67,47 @@
               this._cacheImageData(child);
             }
 
-
-            childImageData = child.imageData;
-
             x = Math.round(child.position.x);
             y = Math.round(child.position.y);
 
-            if(child.opacity > 0 && childImageData){
-              matrixSize = renderData.data.length - 1;
+            if(child.opacity > 0){
 
-              this._updateImageData(child);
+              // if object has children or a texture to render
+              if(child.children.length > 0 || (renderData && child.imageData)){
+                matrixSize = renderData.data.length - 1;
 
-              for(var j = 0; j < childImageData.width; j++){
-                for(var k = 0; k < childImageData.height; k++){
-                  pos = (j * childImageData.width + k) * 4;
-                  pos_x = k + x;
-                  pos_y = j + y;
+                this._updateImageData(child);
+                childImageData = child.imageData;
 
-                  // only render pixels inside the screen, avoid mirror effect
-                  if(pos_x >= 0 && pos_y >= 0 && pos_x < renderData.width && pos_y < renderData.height){
-                    renderPos = (pos_y * renderData.width + pos_x) * 4;
+                for(var j = 0; j < childImageData.width; j++){
+                  for(var k = 0; k < childImageData.height; k++){
+                    pos = (j * childImageData.width + k) * 4;
+                    pos_x = k + x;
+                    pos_y = j + y;
 
-                    // _log += renderPos + " ,";
+                    // only render pixels inside the screen, avoid mirror effect
+                    if(pos_x >= 0 && pos_y >= 0 && pos_x < renderData.width && pos_y < renderData.height){
+                      renderPos = (pos_y * renderData.width + pos_x) * 4;
 
-                    r = childImageData.data[pos+0];
-                    g = childImageData.data[pos+1];
-                    b = childImageData.data[pos+2];
-                    a0 = childImageData.data[pos+3];
+                      // _log += renderPos + " ,";
 
-                    a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
+                      r = childImageData.data[pos+0];
+                      g = childImageData.data[pos+1];
+                      b = childImageData.data[pos+2];
+                      a0 = childImageData.data[pos+3];
 
-                    // check render for pixels with alpha > 0
-                    if(a > 0 && renderPos < matrixSize){
-                      af = renderData.data[renderPos+3] / 255 || 1;
+                      a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
 
-                      renderData.data [renderPos+0] = r * a + (1 - a) * renderData.data [renderPos+0] * af;
-                      // _log += renderPos + " " + renderData.data [renderPos] + ", ";
-                      renderData.data [renderPos+1] = g * a + (1 - a) * renderData.data [renderPos+1] * af;
-                      renderData.data [renderPos+2] = b * a + (1 - a) * renderData.data [renderPos+2] * af;
-                      renderData.data [renderPos+3] = Math.max(a0 * a, renderData.data [renderPos+3]);
+                      // check render for pixels with alpha > 0
+                      if(a > 0 && renderPos < matrixSize){
+                        af = renderData.data[renderPos+3] / 255 || 1;
+
+                        renderData.data [renderPos+0] = r * a + (1 - a) * renderData.data [renderPos+0] * af;
+                        // _log += renderPos + " " + renderData.data [renderPos] + ", ";
+                        renderData.data [renderPos+1] = g * a + (1 - a) * renderData.data [renderPos+1] * af;
+                        renderData.data [renderPos+2] = b * a + (1 - a) * renderData.data [renderPos+2] * af;
+                        renderData.data [renderPos+3] = Math.max(a0 * a, renderData.data [renderPos+3]);
+                      }
                     }
                   }
                 }
@@ -131,8 +135,8 @@
 
     getImageData: function(image){
       var imageData = null;
-      var width = image.width;
-      var height = image.height;
+      var width = Math.min(image.width, this.canvas.width);
+      var height = Math.min(image.height, this.canvas.height);
 
       // draw image in canvas to retrieve image data
 

@@ -6,9 +6,6 @@
 
       var _this = this;
       this.cachedImageData = null;
-      this.position = new GoldenGraphics.Point2D();
-      this.filters = [];
-      this.opacity = 1;
       this.texture = null;
 
       function onImageLoad (){

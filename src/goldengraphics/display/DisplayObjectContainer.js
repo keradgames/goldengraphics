@@ -5,6 +5,8 @@
       this.children = [];
       this.filters = [];
       this.imageData = null;
+      this.position = new GoldenGraphics.Point2D();
+      this.opacity = 1;
       this.parent = null;
 
     },
