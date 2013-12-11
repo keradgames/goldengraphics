@@ -58,8 +58,10 @@
 
     <script type="text/javascript">
       $(function(){
+        var assets = ['media/img/player_01.png', 'media/img/tshirt_01.png', 'media/img/tshirt_02.png'];
         var renderer = new GoldenGraphics.CanvasRenderer();
         var stage = new GoldenGraphics.Stage();
+        var loader = new GoldenGraphics.AssetLoader(assets);
         window.renderer = renderer;
 
         document.getElementById('canvas-container').appendChild(renderer.canvas);
@@ -118,20 +120,11 @@
         $("#purple2").click(function() { tweenColorTo (tshirt_detail, 212, 111, 249, 1); });
 
 
-        render();
-        setTimeout(render, 2000);
-        setTimeout(render, 2001);
+        loader.addEventListener("onComplete", function(){
+          render();
+        });
 
-        // setInterval(function(){
-        //   if(player.contains(tshirt_detail)){
-        //     player.removeChild(tshirt_detail);
-        //   }
-        //   else{
-        //     player.addChild(tshirt_detail);
-        //   }
-
-        //   console.log(player.children.length);
-        // }, 5000);
+        loader.load();
 
       })
 

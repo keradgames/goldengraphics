@@ -1,12 +1,18 @@
 module.exports = function(grunt) {
 
   var srcFiles = [
+    // include PIXI Library partially
+    '<%= dirs.pixi %>/Pixi.js',
+    '<%= dirs.pixi %>/utils/EventTarget.js',
     '<%= dirs.source %>/GoldenGraphics_start.js',
     '<%= dirs.source %>/core/Class.js',
     '<%= dirs.source %>/core/Base.js',
     '<%= dirs.source %>/core/Color.js',
     '<%= dirs.source %>/core/Point2D.js',
+    '<%= dirs.source %>/loaders/ImageLoader.js',
+    '<%= dirs.source %>/loaders/AssetLoader.js',
     '<%= dirs.source %>/render/CanvasRendering.js',
+    '<%= dirs.source %>/display/BaseTexture.js',
     '<%= dirs.source %>/display/DisplayObjectContainer.js',
     '<%= dirs.source %>/display/Stage.js',
     '<%= dirs.source %>/display/Sprite.js',
@@ -19,8 +25,10 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     dirs: {
+      vendor: "src/vendor",
       source: "src/<%= pkg.name %>",
-      build: "bin"
+      build: "bin",
+      pixi: "<%= dirs.vendor%>/pixi"
     },
 
     files: {
@@ -30,7 +38,7 @@ module.exports = function(grunt) {
 
     concat: {
       options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+        banner: '// Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author%> \n // <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> \n  <%= pkg.license %> \n'
       },
       dist: {
         src: srcFiles,

@@ -182,4 +182,3 @@
   });
 
   // Static functions and properties
-

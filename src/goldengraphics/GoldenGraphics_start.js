@@ -1,3 +1,5 @@
+
+
 (function(exports){
   var GoldenGraphics = {};
 

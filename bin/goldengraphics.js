@@ -1,4 +1,84 @@
-/*! goldengraphics 2013-12-10 */
+// Copyright (c) 2013 Kerad Games S. L. 
+ // goldengraphics 2013-12-11 
+  /* The MIT License (MIT) 
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
+
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. 
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */ 
+/**
+ * @author Mat Groves http://matgroves.com/ @Doormat23
+ */
+
+/**
+ * @module PIXI
+ */
+var PIXI = PIXI || {};
+
+/**
+ * https://github.com/mrdoob/eventtarget.js/
+ * THankS mr DOob!
+ */
+
+/**
+ * Adds event emitter functionality to a class
+ *
+ * @class EventTarget
+ * @example
+ *		function MyEmitter() {
+ *			PIXI.EventTarget.call(this); //mixes in event target stuff
+ *		}
+ *
+ *		var em = new MyEmitter();
+ *		em.emit({ type: 'eventName', data: 'some data' });
+ */
+PIXI.EventTarget = function () {
+
+	var listeners = {};
+	
+	this.addEventListener = this.on = function ( type, listener ) {
+		
+		
+		if ( listeners[ type ] === undefined ) {
+
+			listeners[ type ] = [];
+			
+		}
+
+		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
+
+			listeners[ type ].push( listener );
+		}
+
+	};
+
+	this.dispatchEvent = this.emit = function ( event ) {
+		
+		for ( var listener in listeners[ event.type ] ) {
+
+			listeners[ event.type ][ listener ]( event );
+			
+		}
+
+	};
+
+	this.removeEventListener = this.off = function ( type, listener ) {
+
+		var index = listeners[ type ].indexOf( listener );
+
+		if ( index !== - 1 ) {
+
+			listeners[ type ].splice( index, 1 );
+
+		}
+
+	};
+
+};
+
+
+
 (function(exports){
   var GoldenGraphics = {};
 
@@ -123,6 +203,181 @@
       this.y = y || 0;
     }
   })
+/**
+ * Derived from PIXI.ImageLoader @author Mat Groves http://matgroves.com/ @Doormat23
+ */
+
+/**
+ * The image loader class is responsible for loading images file formats ("jpeg", "jpg", "png" and "gif")
+ * Once the image has been loaded it is stored in the PIXI texture cache and can be accessed though PIXI.Texture.fromFrameId() and PIXI.Sprite.fromFromeId()
+ * When loaded this class will dispatch a 'loaded' event
+ *
+ * @class ImageLoader
+ * @uses EventTarget
+ * @constructor
+ * @param url {String} The url of the image
+ * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
+ */
+GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
+  init: function(url, crossorigin){
+    PIXI.EventTarget.call(this);
+    this.url = url;
+  },
+
+  /**
+   * Loads image or takes it from cache
+   *
+   * @method load
+   */
+  load: function(){
+    // TODO cache textures
+    var _this = this;
+
+    if(GoldenGraphics.BaseTexture.cache[this.url]){
+      this.img = GoldenGraphics.BaseTexture.cache[this.url];
+      this.onLoaded();
+    }
+    else{
+      this.img = new Image();
+      this.img.addEventListener("load", function(){
+        GoldenGraphics.BaseTexture.cache[_this.url] = _this.img;
+        _this.onLoaded();
+      });
+
+      this.img.src = this.url;
+    }
+
+  },
+
+  /**
+   * Invoked when image file is loaded or it is already cached and ready to use
+   *
+   * @method onLoaded
+   * @private
+   */
+  onLoaded: function(){
+    this.dispatchEvent({type: "loaded", content: this});
+  }
+
+})
+
+
+/**
+ * Derived from PIXI.AssetLoader @author Mat Groves http://matgroves.com/ @Doormat23
+ */
+
+/**
+ * A Class that loads a bunch of images / sprite sheet / bitmap font files. Once the
+ * assets have been loaded they are added to the PIXI Texture cache and can be accessed
+ * easily through PIXI.Texture.fromImage() and PIXI.Sprite.fromImage()
+ * When all items have been loaded this class will dispatch a "onLoaded" event
+ * As each individual item is loaded this class will dispatch a "onProgress" event
+ *
+ * @class AssetLoader
+ * @constructor
+ * @uses EventTarget
+ * @param {Array<String>} assetURLs an array of image/sprite sheet urls that you would like loaded
+ *      supported. Supported image formats include "jpeg", "jpg", "png", "gif". Supported
+ *      sprite sheet data formats only include "JSON" at this time. Supported bitmap font
+ *      data formats include "xml" and "fnt".
+ * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
+ */
+
+/**
+ * Fired when an item has loaded
+ * @event onProgress
+ */
+
+/**
+ * Fired when all the assets have loaded
+ * @event onComplete
+ */
+
+GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
+  init : function(assetURLs, crossorigin)
+  {
+    PIXI.EventTarget.call(this);
+
+    /**
+     * The array of asset URLs that are going to be loaded
+       *
+     * @property assetURLs
+     * @type Array<String>
+     */
+    this.assetURLs = assetURLs;
+
+      /**
+       * Whether the requests should be treated as cross origin
+       *
+       * @property crossorigin
+       * @type Boolean
+       */
+    this.crossorigin = crossorigin;
+
+      /**
+       * Maps file extension to loader types
+       *
+       * @property loadersByType
+       * @type Object
+       */
+      this.loadersByType = {
+          "jpg":  GoldenGraphics.ImageLoader,
+          "jpeg": GoldenGraphics.ImageLoader,
+          "png":  GoldenGraphics.ImageLoader,
+          "gif":  GoldenGraphics.ImageLoader
+      };
+  },
+
+  /**
+   * Starts loading the assets sequentially
+   *
+   * @method load
+   */
+  load: function()  {
+      var scope = this;
+
+    this.loadCount = this.assetURLs.length;
+
+      for (var i=0; i < this.assetURLs.length; i++)
+    {
+      var fileName = this.assetURLs[i];
+      var fileType = fileName.split(".").pop().toLowerCase();
+
+          var loaderClass = this.loadersByType[fileType];
+          if(!loaderClass)
+              throw new Error(fileType + " is an unsupported file type");
+
+          var loader = new loaderClass(fileName, this.crossorigin);
+
+          loader.addEventListener("loaded", function()
+          {
+              scope.onAssetLoaded();
+          });
+          loader.load();
+    }
+  },
+
+  /**
+   * Invoked after each file is loaded
+   *
+   * @method onAssetLoaded
+   * @private
+   */
+  onAssetLoaded: function() {
+      this.loadCount--;
+    this.dispatchEvent({type: "onProgress", content: this});
+    if(this.onProgress) this.onProgress();
+
+    if(this.loadCount == 0)
+    {
+      this.dispatchEvent({type: "onComplete", content: this});
+      if(this.onComplete) this.onComplete();
+    }
+  }
+});
+
+
+
 // RENDERING
 
   GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
@@ -307,8 +562,13 @@
   });
 
   // Static functions and properties
+GoldenGraphics.BaseTexture = GoldenGraphics.Base.extend({
+  init : function(){
 
+  }
+});
 
+GoldenGraphics.BaseTexture.cache = {};
 // DISPLAY OBJECT CONTAINER
 
   GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
@@ -480,23 +740,25 @@
 
       var _this = this;
       this.cachedImageData = null;
-      this.texture = null;
+      // this.texture = null;
 
-      function onImageLoad (){
-        _this.texture = this;
-      }
+      this.texture = image;
 
-      image.addEventListener("load", onImageLoad);
+      // function onImageLoad (){
+      //   _this.texture = this;
+      // }
+
+      // image.addEventListener("load", onImageLoad);
     }
   });
 
   // Static functions and properties
 
   GoldenGraphics.Sprite.fromImageUrl = function(url){
-    var image = new Image();
+    var image = GoldenGraphics.BaseTexture.cache[url] || new Image();
     var sprite = null;
+    image.src = image.src || url;
 
-    image.src = url;
     sprite = new GoldenGraphics.Sprite(image);
 
     return sprite;
