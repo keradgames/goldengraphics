@@ -8,13 +8,17 @@
       this.cachedImageData = null;
       // this.texture = null;
 
-      this.texture = image;
+      if(image.complete){
+        onImageLoad();
+      }
+      else{
+        image.addEventListener("load", onImageLoad);
+      }
 
-      // function onImageLoad (){
-      //   _this.texture = this;
-      // }
+      function onImageLoad (){
+        _this.texture = image;
+      }
 
-      // image.addEventListener("load", onImageLoad);
     }
   });
 
@@ -23,7 +27,10 @@
   GoldenGraphics.Sprite.fromImageUrl = function(url){
     var image = GoldenGraphics.BaseTexture.cache[url] || new Image();
     var sprite = null;
-    image.src = image.src || url;
+
+    if(!image.src){
+      image.src = url;
+    }
 
     sprite = new GoldenGraphics.Sprite(image);
 
