@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <style type="text/css">
+
+      body
+      {
+        background-color: #fff;
+      }
+
+      canvas
+      {
+        border: 1px solid #444;
+      }
+
+      img{
+        display: block;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="canvas-container"></div>
+    <button id="render-button">Render</button>
+
+    <img src="media/img/blue.png" />
+    <img src="media/img/red.png" />
+
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
+    <script src="../../bin/goldengraphics.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+      $(function(){
+        var assets = ['media/img/blue.png', 'media/img/red.png'];
+        var renderer = new GoldenGraphics.CanvasRenderer();
+        var stage = new GoldenGraphics.Stage();
+        var loader = new GoldenGraphics.AssetLoader(assets);
+        window.renderer = renderer;
+
+        document.getElementById('canvas-container').appendChild(renderer.canvas);
+
+        renderer.resize(600, 400);
+
+        var blue = GoldenGraphics.Sprite.fromImageUrl('media/img/blue.png');
+        var red = GoldenGraphics.Sprite.fromImageUrl('media/img/red.png');
+
+        red.position.x = 100;
+        red.position.y = 100;
+
+        // red.opacity = 0.5;
+
+        stage.addChild(blue);
+        stage.addChild(red);
+
+        window.render = function(){
+          // window.requestAnimationFrame(render);
+          renderer.render(stage);
+        }
+
+        $("#render-button").click(window.render);
+
+
+        loader.addEventListener("onComplete", function(){
+          render();
+        });
+
+        loader.load();
+
+      })
+
+
+    </script>
+  </body>
+</html>
