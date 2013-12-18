@@ -50,6 +50,10 @@
       var y = 0;
       var pos_x = 0;
       var pos_y = 0;
+      var renderDataWidth = 0;
+      var renderDataHeight = 0;
+      var childImageWidth = 0;
+      var childImageHeight = 0;
 
       var _log = "";
 
@@ -65,6 +69,10 @@
             if(!renderData){
               renderData = displayObject.cachedImageData ? displayObject.cachedImageData : this.context.createImageData(this.canvas.width, this.canvas.height);
             }
+
+            renderDataWidth = renderData.width;
+            renderDataHeight = renderData.height;
+
             child = displayObject.children[i];
 
 
@@ -84,9 +92,12 @@
                 this._updateImageData(child);
                 childImageData = child.imageData;
 
-                for(var j = 0; j < childImageData.width; j++){
-                  for(var k = 0; k < childImageData.height; k++){
-                    pos = (j * childImageData.width + k) * 4;
+                childImageWidth = childImageData.width;
+                childImageHeight = childImageData.height;
+
+                for(var j = 0; j < childImageWidth; j++){
+                  for(var k = 0; k < childImageHeight; k++){
+                    pos = (j * childImageWidth + k) * 4;
                     pos_x = k + x;
                     pos_y = j + y;
 
@@ -124,7 +135,7 @@
 
         this._applyFilters(displayObject);
 
-        if(_log && _log.length > 0){
+        if(_log && _log.length > 0 && console){
           console.log(_log);
         }
 
