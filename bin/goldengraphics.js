@@ -1,5 +1,5 @@
 // Copyright (c) 2013 Kerad Games S. L. 
- // goldengraphics 2013-12-17 
+ // goldengraphics 2013-12-18 
   /* The MIT License (MIT) 
  
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
@@ -430,6 +430,10 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
       var y = 0;
       var pos_x = 0;
       var pos_y = 0;
+      var renderDataWidth = 0;
+      var renderDataHeight = 0;
+      var childImageWidth = 0;
+      var childImageHeight = 0;
 
       var _log = "";
 
@@ -445,6 +449,10 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
             if(!renderData){
               renderData = displayObject.cachedImageData ? displayObject.cachedImageData : this.context.createImageData(this.canvas.width, this.canvas.height);
             }
+
+            renderDataWidth = renderData.width;
+            renderDataHeight = renderData.height;
+
             child = displayObject.children[i];
 
 
@@ -464,9 +472,12 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
                 this._updateImageData(child);
                 childImageData = child.imageData;
 
-                for(var j = 0; j < childImageData.width; j++){
-                  for(var k = 0; k < childImageData.height; k++){
-                    pos = (j * childImageData.width + k) * 4;
+                childImageWidth = childImageData.width;
+                childImageHeight = childImageData.height;
+
+                for(var j = 0; j < childImageWidth; j++){
+                  for(var k = 0; k < childImageHeight; k++){
+                    pos = (j * childImageWidth + k) * 4;
                     pos_x = k + x;
                     pos_y = j + y;
 
@@ -504,7 +515,7 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
 
         this._applyFilters(displayObject);
 
-        if(_log && _log.length > 0){
+        if(_log && _log.length > 0 && console){
           console.log(_log);
         }
 
