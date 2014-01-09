@@ -421,16 +421,29 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
       // clear canvas
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+      var t0 = (new Date()).getTime();
+        $('img').remove();
+
       if(stage){
         this._updateImageData(stage);
 
-        if(stage.imageData){
-          this.context.putImageData(stage.imageData, 0, 0);
+
+        // if(stage.imageData){
+        //   this.context.putImageData(stage.imageData, 0, 0);
+        // }
+
+        if(stage._render && stage._render._imageToRender){
+          this.context.drawImage(stage._render._imageToRender, 0, 0, stage._render._imageToRender.width, stage._render._imageToRender.height);
         }
       }
       else{
         console.log('Stage is not defined');
       }
+
+      var t1 = (new Date()).getTime();
+
+      console.log("render", (t1 - t0));
+
 
     },
 
@@ -469,87 +482,80 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
 
       // only update render data for objects in the stage
       if(displayObject && displayObject.stage){
-        if(!displayObject.cachedImageData){
-          this._cacheImageData(displayObject);
+        displayObject._render = displayObject._render || {};
+
+
+        if(!displayObject._render._canvas){
+          this._createTextureCanvas(displayObject);
+        }
+        else{
+          displayObject._render._context.clearRect(0, 0, displayObject._render._canvas.width, displayObject._render._canvas.height);
+        }
+
+          displayObject._render._imageToRender = new Image();
+        if(!displayObject._render._imageToRender){
+        }
+
+        if(displayObject.texture){
+          displayObject._render._context.drawImage(displayObject.texture, 0, 0, displayObject.texture.width, displayObject.texture.height);
         }
 
         // for each child
         for(var i in displayObject.children){
           if(displayObject.children.hasOwnProperty(i)){
-            if(!renderData){
-              renderData = displayObject.cachedImageData ? displayObject.cachedImageData : this.context.createImageData(this.canvas.width, this.canvas.height);
-            }
 
-            renderDataWidth = renderData.width;
-            renderDataHeight = renderData.height;
 
             child = displayObject.children[i];
 
-
-            if(child.texture && !child.cachedImageData){
-              this._cacheImageData(child);
-            }
 
             x = Math.round(child.position.x);
             y = Math.round(child.position.y);
 
             if(child.opacity > 0){
 
-              // if object has children or a texture to render
-              if(child.children.length > 0 || (renderData && child.imageData)){
-                matrixSize = renderData.data.length - 1;
+              this._updateImageData(child);
 
-                this._updateImageData(child);
-                childImageData = child.imageData;
+              if(child._render._imageToRender){
 
-                childImageWidth = childImageData.width;
-                childImageHeight = childImageData.height;
+                var t0 = (new Date()).getTime();
+                var t1 = (new Date()).getTime();
+                var limit = 500;
 
-                for(var j = 0; j < childImageWidth; j++){
-                  for(var k = 0; k < childImageHeight; k++){
-                    pos = (j * childImageWidth + k) * 4;
-                    pos_x = k + x;
-                    pos_y = j + y;
+                while(!child._render._imageToRender.complete && t1 - t0 < limit){
+                  t1 = (new Date()).getTime();
+                }
 
-                    // only render pixels inside the screen, avoid mirror effect
-                    if(pos_x >= 0 && pos_y >= 0 && pos_x < renderData.width && pos_y < renderData.height){
-                      renderPos = (pos_y * renderData.width + pos_x) * 4;
-
-                      // _log += renderPos + " ,";
-
-                      r = childImageData.data[pos+0];
-                      g = childImageData.data[pos+1];
-                      b = childImageData.data[pos+2];
-                      a0 = childImageData.data[pos+3];
-
-                      a = a0 / 255 * child.opacity; //normaliza alpha between 0 and 1 and apply opacity
-
-                      // check render for pixels with alpha > 0
-                      if(a > 0 && renderPos < matrixSize){
-                        af = renderData.data[renderPos+3] / 255 || 1;
-
-                        renderData.data [renderPos+0] = r * a + (1 - a) * renderData.data [renderPos+0] * af;
-                        renderData.data [renderPos+1] = g * a + (1 - a) * renderData.data [renderPos+1] * af;
-                        renderData.data [renderPos+2] = b * a + (1 - a) * renderData.data [renderPos+2] * af;
-                        renderData.data [renderPos+3] = Math.max(a0, renderData.data [renderPos+3]);
-                        // var p1 = renderPos + 3;
-                        // _log += p1 + " " + b + ",   ";
-                      }
-                    }
-                  }
+                if(child._render._imageToRender.complete){
+                  displayObject._render._context.drawImage(child._render._imageToRender, x, y, child._render._imageToRender.naturalWidth, child._render._imageToRender.naturalHeight);
+                }
+                else{
+                  console.log(child._render._imageToRender.complete, child._render._imageToRender.naturalWidth, child._render._imageToRender.naturalHeight);
+                  debugger;
+                  child._render._imageToRender.onload = function(){
+                    debugger;
+                  };
                 }
               }
             }
           }
         }
 
-        this._applyFilters(displayObject);
-
-        if(_log && _log.length > 0 && console){
-          console.log(_log);
+        if(displayObject.filters && displayObject.filters.length > 0){
+          this._applyFilters(displayObject);
+          displayObject._render._imageToRender.src = displayObject._render._canvas.toDataURL();
+        }
+        else{
+          if(displayObject.children.length > 0){
+            displayObject._render._imageToRender.src = displayObject._render._canvas.toDataURL();
+          }
+          else{
+            displayObject._render._imageToRender = displayObject.texture;
+          }
         }
 
-        displayObject.imageData = renderData || displayObject.imageData;
+
+        // console.log("img", displayObject._render._imageToRender.src);
+
       }
     },
 
@@ -560,12 +566,30 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
       }
     },
 
+    _createTextureCanvas: function(displayObject){
+      displayObject._render = displayObject._render || {};
+      displayObject._render._canvas = document.createElement('canvas');
+      displayObject._render._context = displayObject._render._canvas.getContext('2d');
+      document.body.appendChild(displayObject._render._canvas);
+
+      if(displayObject.texture){
+        displayObject._render._canvas.width = displayObject.texture.width;
+        displayObject._render._canvas.height = displayObject.texture.height;
+      }
+      else{
+        displayObject._render._canvas.width = this.canvas.width;
+        displayObject._render._canvas.height = this.canvas.height;
+      }
+    },
+
     _applyFilters : function(displayObject){
-      if(displayObject.cachedImageData && displayObject.imageData){
-        for(var i in displayObject.filters){
-          if(displayObject.filters.hasOwnProperty(i)){
-            displayObject.filters[i].apply(displayObject.cachedImageData, displayObject.imageData);
-          }
+      for(var i in displayObject.filters){
+        if(displayObject.filters.hasOwnProperty(i)){
+          var imageData = displayObject._render._context.getImageData(0, 0, displayObject._render._canvas.width, displayObject._render._canvas.height);
+          var filteredImageData = displayObject._render._context.createImageData(imageData);
+
+          displayObject.filters[i].apply(imageData, filteredImageData);
+          displayObject._render._context.putImageData(filteredImageData, 0, 0);
         }
       }
     },
@@ -836,13 +860,13 @@ GoldenGraphics.BaseTexture.cache = {};
       var pos = 0;
       var inpos = 0;
 
-      var r = this.color.r;
-      var g = this.color.g;
-      var b = this.color.b;
+      var r = parseInt(this.color.r);
+      var g = parseInt(this.color.g);
+      var b = parseInt(this.color.b);
 
-      var _log = "";
+      // var _log = '';
 
-      if(!this._prevColor || this._prevColor.r != this.color.r || this._prevColor.g != this.color.g || this._prevColor.b != this.color.b){
+      // if(!this._prevColor || this._prevColor.r != this.color.r || this._prevColor.g != this.color.g || this._prevColor.b != this.color.b){
         for (var i = 0; i < origin.width; i ++){
           for (var j = 0; j < origin.height; j ++){
             var r_0 = origin.data [inpos++];
@@ -851,7 +875,9 @@ GoldenGraphics.BaseTexture.cache = {};
             var a_0 = origin.data [inpos++];
 
             if (a_0 > 0){
+
               target.data [pos] = r * origin.data [pos] / 255;
+              // _log += target.data [pos] + ' ';
               pos ++;
               target.data [pos] = g * origin.data [pos] / 255;
               pos ++;
@@ -866,18 +892,20 @@ GoldenGraphics.BaseTexture.cache = {};
           }
         }
 
-        if(this._prevColor){
-          this._prevColor.r = this.color.r;
-          this._prevColor.g = this.color.g;
-          this._prevColor.b = this.color.b;
-          this._prevColor.a = this.color.a;
-        }
-        else{
-          this._prevColor = new GoldenGraphics.Color(this.color.r, this.color.g, this.color.b, this.color.a);
-        }
+        // console.log(_log);
+
+      //   if(this._prevColor){
+      //     this._prevColor.r = this.color.r;
+      //     this._prevColor.g = this.color.g;
+      //     this._prevColor.b = this.color.b;
+      //     this._prevColor.a = this.color.a;
+      //   }
+      //   else{
+      //     this._prevColor = new GoldenGraphics.Color(this.color.r, this.color.g, this.color.b, this.color.a);
+      //   }
 
 
-      }
+      // }
 
     }
   });

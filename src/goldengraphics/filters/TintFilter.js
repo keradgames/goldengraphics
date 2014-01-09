@@ -21,13 +21,13 @@
       var pos = 0;
       var inpos = 0;
 
-      var r = this.color.r;
-      var g = this.color.g;
-      var b = this.color.b;
+      var r = parseInt(this.color.r);
+      var g = parseInt(this.color.g);
+      var b = parseInt(this.color.b);
 
-      var _log = "";
+      // var _log = '';
 
-      if(!this._prevColor || this._prevColor.r != this.color.r || this._prevColor.g != this.color.g || this._prevColor.b != this.color.b){
+      // if(!this._prevColor || this._prevColor.r != this.color.r || this._prevColor.g != this.color.g || this._prevColor.b != this.color.b){
         for (var i = 0; i < origin.width; i ++){
           for (var j = 0; j < origin.height; j ++){
             var r_0 = origin.data [inpos++];
@@ -36,7 +36,9 @@
             var a_0 = origin.data [inpos++];
 
             if (a_0 > 0){
+
               target.data [pos] = r * origin.data [pos] / 255;
+              // _log += target.data [pos] + ' ';
               pos ++;
               target.data [pos] = g * origin.data [pos] / 255;
               pos ++;
@@ -51,18 +53,20 @@
           }
         }
 
-        if(this._prevColor){
-          this._prevColor.r = this.color.r;
-          this._prevColor.g = this.color.g;
-          this._prevColor.b = this.color.b;
-          this._prevColor.a = this.color.a;
-        }
-        else{
-          this._prevColor = new GoldenGraphics.Color(this.color.r, this.color.g, this.color.b, this.color.a);
-        }
+        // console.log(_log);
+
+      //   if(this._prevColor){
+      //     this._prevColor.r = this.color.r;
+      //     this._prevColor.g = this.color.g;
+      //     this._prevColor.b = this.color.b;
+      //     this._prevColor.a = this.color.a;
+      //   }
+      //   else{
+      //     this._prevColor = new GoldenGraphics.Color(this.color.r, this.color.g, this.color.b, this.color.a);
+      //   }
 
 
-      }
+      // }
 
     }
   });

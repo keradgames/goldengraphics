@@ -54,6 +54,9 @@
       <a id="purple2" href="#"></a>
     </div>
     <script src="http://code.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
+    <!--
+    <script src="../../bin/goldengraphics_pixel_rendering.js" type="text/javascript"></script>
+    -->
     <script src="../../bin/goldengraphics.js" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -69,17 +72,18 @@
         renderer.resize(600, 400);
 
         var player = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
-        player.filters = [new GoldenGraphics.filters.TintFilter(130, 50, 0)];
+        // player.filters = [new GoldenGraphics.filters.TintFilter(130, 50, 0)];
         // player.position.x = 300;
 
         var tshirt = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_01.png');
-        // tshirt.position.x = 50;
+        tshirt.position.x = 50;
         // tshirt.opacity = 0;
         tshirt.filters = [new GoldenGraphics.filters.TintFilter(130, 0, 50)];
 
 
         var tshirt_detail = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_02.png');
-        tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
+        tshirt_detail.position.x = -50;
+        // tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
 
 
         stage.addChild(player);
@@ -101,7 +105,7 @@
 
         function tweenColorTo(obj, r, g, b){
           if(obj.filters[0]){
-            $(obj.filters[0].color).animate({r: r, g: g, b: b}, {duration: 500, step:render, complete: render});
+            $(obj.filters[0].color).animate({r: r, g: g, b: b}, {duration: 0, step:null, complete: render});
           }
         }
 
@@ -121,7 +125,7 @@
 
 
         loader.addEventListener("onComplete", function(){
-          render();
+          setTimeout(render, 15);
         });
 
         loader.load();
