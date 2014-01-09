@@ -39,6 +39,10 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
         _this.onLoaded();
       });
 
+      this.img.addEventListener("error", function(){
+        _this.onError();
+      });
+
       this.img.src = this.url;
     }
 
@@ -52,6 +56,16 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
    */
   onLoaded: function(){
     this.dispatchEvent({type: "loaded", content: this});
+  },
+
+  /**
+   * Invoked when there is an error loading one of the images
+   *
+   * @method onError
+   * @private
+   */
+  onError: function(){
+    this.dispatchEvent({type: "error", content: this});
   }
 
 })

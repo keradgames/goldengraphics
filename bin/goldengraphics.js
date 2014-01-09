@@ -1,5 +1,5 @@
-// Copyright (c) 2013 Kerad Games S. L. 
- // goldengraphics 2013-12-18 
+// Copyright (c) 2014 Kerad Games S. L. 
+ // goldengraphics 2014-01-09 
   /* The MIT License (MIT) 
  
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
@@ -244,6 +244,10 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
         _this.onLoaded();
       });
 
+      this.img.addEventListener("error", function(){
+        _this.onError();
+      });
+
       this.img.src = this.url;
     }
 
@@ -257,6 +261,16 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
    */
   onLoaded: function(){
     this.dispatchEvent({type: "loaded", content: this});
+  },
+
+  /**
+   * Invoked when there is an error loading one of the images
+   *
+   * @method onError
+   * @private
+   */
+  onError: function(){
+    this.dispatchEvent({type: "error", content: this});
   }
 
 })
@@ -353,6 +367,12 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
           {
               scope.onAssetLoaded();
           });
+
+          loader.addEventListener("error", function()
+          {
+              scope.onError();
+          });
+
           loader.load();
     }
   },
@@ -373,6 +393,16 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
       this.dispatchEvent({type: "onComplete", content: this});
       if(this.onComplete) this.onComplete();
     }
+  },
+
+  /**
+   * Invoked when there is an error loading one of the assets
+   *
+   * @method onError
+   * @private
+   */
+  onError: function(){
+    this.dispatchEvent({type: "onError", content: this});
   }
 });
 

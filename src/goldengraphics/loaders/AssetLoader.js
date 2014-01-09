@@ -89,6 +89,12 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
           {
               scope.onAssetLoaded();
           });
+
+          loader.addEventListener("error", function()
+          {
+              scope.onError();
+          });
+
           loader.load();
     }
   },
@@ -109,6 +115,16 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
       this.dispatchEvent({type: "onComplete", content: this});
       if(this.onComplete) this.onComplete();
     }
+  },
+
+  /**
+   * Invoked when there is an error loading one of the assets
+   *
+   * @method onError
+   * @private
+   */
+  onError: function(){
+    this.dispatchEvent({type: "onError", content: this});
   }
 });
 
