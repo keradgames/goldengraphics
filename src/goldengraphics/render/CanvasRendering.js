@@ -4,6 +4,8 @@
     init: function(){
       this.canvas = document.createElement('canvas');
       this.context = this.canvas.getContext("2d");
+
+      this.context.globalCompositeOperation = "destination-over";
       this.imageData = this.context.createImageData(this.canvas.width, this.canvas.height);
     },
 
@@ -12,8 +14,6 @@
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
       var t0 = (new Date()).getTime();
-        $('img').remove();
-
       if(stage){
         this._updateImageData(stage);
 
@@ -22,9 +22,9 @@
         //   this.context.putImageData(stage.imageData, 0, 0);
         // }
 
-        if(stage._render && stage._render._imageToRender){
-          this.context.drawImage(stage._render._imageToRender, 0, 0, stage._render._imageToRender.width, stage._render._imageToRender.height);
-        }
+        // if(stage._render && stage._render._imageToRender){
+        //   this.context.drawImage(stage._render._imageToRender, 0, 0, stage._render._imageToRender.width, stage._render._imageToRender.height);
+        // }
       }
       else{
         console.log('Stage is not defined');
@@ -120,9 +120,8 @@
                 }
                 else{
                   console.log(child._render._imageToRender.complete, child._render._imageToRender.naturalWidth, child._render._imageToRender.naturalHeight);
-                  debugger;
                   child._render._imageToRender.onload = function(){
-                    debugger;
+
                   };
                 }
               }
@@ -158,17 +157,24 @@
 
     _createTextureCanvas: function(displayObject){
       displayObject._render = displayObject._render || {};
-      displayObject._render._canvas = document.createElement('canvas');
-      displayObject._render._context = displayObject._render._canvas.getContext('2d');
-      document.body.appendChild(displayObject._render._canvas);
 
-      if(displayObject.texture){
-        displayObject._render._canvas.width = displayObject.texture.width;
-        displayObject._render._canvas.height = displayObject.texture.height;
+      if(displayObject.stage == displayObject){
+        displayObject._render._canvas = this.canvas;
+        displayObject._render._context = this.context;
       }
       else{
-        displayObject._render._canvas.width = this.canvas.width;
-        displayObject._render._canvas.height = this.canvas.height;
+        displayObject._render._canvas = document.createElement('canvas');
+        displayObject._render._context = displayObject._render._canvas.getContext('2d');
+        document.body.appendChild(displayObject._render._canvas);
+
+        if(displayObject.texture){
+          displayObject._render._canvas.width = displayObject.texture.width;
+          displayObject._render._canvas.height = displayObject.texture.height;
+        }
+        else{
+          displayObject._render._canvas.width = this.canvas.width;
+          displayObject._render._canvas.height = this.canvas.height;
+        }
       }
     },
 
