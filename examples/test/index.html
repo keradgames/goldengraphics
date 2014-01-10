@@ -76,14 +76,14 @@
         // player.position.x = 300;
 
         var tshirt = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_01.png');
-        tshirt.position.x = 50;
+        // tshirt.position.x = 50;
         // tshirt.opacity = 0;
         tshirt.filters = [new GoldenGraphics.filters.TintFilter(130, 0, 50)];
 
 
         var tshirt_detail = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_02.png');
-        tshirt_detail.position.x = -50;
-        // tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
+        // tshirt_detail.position.x = -50;
+        tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
 
 
         stage.addChild(player);
@@ -105,7 +105,7 @@
 
         function tweenColorTo(obj, r, g, b){
           if(obj.filters[0]){
-            $(obj.filters[0].color).animate({r: r, g: g, b: b}, {duration: 0, step:null, complete: render});
+            $(obj.filters[0].color).animate({r: r, g: g, b: b}, {duration: 400, step:render, complete: render});
           }
         }
 
