@@ -76,5 +76,8 @@
 
       displayObject._render._context.putImageData(displayObject._render._chachedFilteredData || origin, 0, 0);
 
+      // FIXME temporarily disable filter cache
+      displayObject._render._chachedFilteredData = null;
+
     }
   });

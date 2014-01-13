@@ -470,12 +470,7 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
           displayObject._render._context.clearRect(0, 0, displayObject._render._canvas.width, displayObject._render._canvas.height);
         }
 
-          displayObject._render._imageToRender = new Image();
-        if(!displayObject._render._imageToRender){
-        }
-
         if(displayObject.texture){
-          displayObject._render._context.globalAlpha = displayObject.opacity;
           displayObject._render._context.drawImage(displayObject.texture, 0, 0, displayObject.texture.width, displayObject.texture.height);
         }
 
@@ -882,6 +877,9 @@ GoldenGraphics.BaseTexture.cache = {};
 
 
       displayObject._render._context.putImageData(displayObject._render._chachedFilteredData || origin, 0, 0);
+
+      // FIXME temporarily disable filter cache
+      displayObject._render._chachedFilteredData = null;
 
     }
   });
