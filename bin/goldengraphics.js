@@ -1,5 +1,5 @@
 // Copyright (c) 2014 Kerad Games S. L. 
- // goldengraphics 2014-01-10 
+ // goldengraphics 2014-01-13 
   /* The MIT License (MIT) 
  
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
@@ -475,6 +475,7 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
         }
 
         if(displayObject.texture){
+          displayObject._render._context.globalAlpha = displayObject.opacity;
           displayObject._render._context.drawImage(displayObject.texture, 0, 0, displayObject.texture.width, displayObject.texture.height);
         }
 
@@ -494,6 +495,7 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
               this._updateImageData(child);
 
               if(child._render._imageToRender){
+                displayObject._render._context.globalAlpha = child.opacity;
                 displayObject._render._context.drawImage(child._render._imageToRender, x, y, child._render._imageToRender.width, child._render._imageToRender.height);
               }
             }

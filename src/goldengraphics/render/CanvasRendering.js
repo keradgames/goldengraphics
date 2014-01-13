@@ -64,6 +64,7 @@
         }
 
         if(displayObject.texture){
+          displayObject._render._context.globalAlpha = displayObject.opacity;
           displayObject._render._context.drawImage(displayObject.texture, 0, 0, displayObject.texture.width, displayObject.texture.height);
         }
 
@@ -83,6 +84,7 @@
               this._updateImageData(child);
 
               if(child._render._imageToRender){
+                displayObject._render._context.globalAlpha = child.opacity;
                 displayObject._render._context.drawImage(child._render._imageToRender, x, y, child._render._imageToRender.width, child._render._imageToRender.height);
               }
             }
