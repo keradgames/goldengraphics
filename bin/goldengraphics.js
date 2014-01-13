@@ -96,10 +96,11 @@ PIXI.EventTarget = function () {
     var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
 
     // The base Class implementation (does nothing)
-    this.Class = function(){};
+    GoldenGraphics.Class = function(){};
+    GoldenGraphics.Class.prototype = {};
 
     // Create a new Class that inherits from this class
-    Class.extend = function(prop) {
+    GoldenGraphics.Class.extend = function(prop) {
       var _super = this.prototype;
 
       // Instantiate a base class (but only create the instance,
@@ -153,7 +154,7 @@ PIXI.EventTarget = function () {
   })();
 // CORE
 
-  GoldenGraphics.Base = Class.extend({
+  GoldenGraphics.Base = GoldenGraphics.Class.extend({
     init : function(){}
   });
 
@@ -542,11 +543,9 @@ GoldenGraphics.AssetLoader = GoldenGraphics.Base.extend({
     _applyFilters : function(displayObject){
       for(var i in displayObject.filters){
         if(displayObject.filters.hasOwnProperty(i)){
-          var imageData = displayObject._render._context.getImageData(0, 0, displayObject._render._canvas.width, displayObject._render._canvas.height);
-          var filteredImageData = displayObject._render._context.createImageData(imageData);
+          displayObject._render = displayObject._render || {};
 
-          displayObject.filters[i].apply(imageData, filteredImageData);
-          displayObject._render._context.putImageData(filteredImageData, 0, 0);
+          displayObject.filters[i].apply(displayObject);
         }
       }
     },
@@ -622,6 +621,11 @@ GoldenGraphics.BaseTexture.cache = {};
         this._addChildToStage(child);
       }
 
+      // TODO remove dependence on render
+      if(this._render && this._render._chachedFilteredData){
+        this._render._chachedFilteredData = null;
+      }
+
     },
 
     removeChild : function(child){
@@ -629,6 +633,11 @@ GoldenGraphics.BaseTexture.cache = {};
         this.children.splice(this.children.indexOf(child), 1);
         this._removeChildFromStage(child);
         child.parent = null;
+
+        // TODO remove dependence on render
+        if(this._render && this._render._chachedFilteredData){
+          this._render._chachedFilteredData = null;
+        }
 
         // clear render
         // this.
@@ -813,7 +822,10 @@ GoldenGraphics.BaseTexture.cache = {};
       this._prevColor = null;
     },
 
-    apply: function(origin, target) {
+    apply: function(displayObject) {
+      var origin = displayObject._render._context.getImageData(0, 0, displayObject._render._canvas.width, displayObject._render._canvas.height);
+      var target = displayObject._render._context.createImageData(origin);
+
       var pos = 0;
       var inpos = 0;
 
@@ -821,9 +833,9 @@ GoldenGraphics.BaseTexture.cache = {};
       var g = parseInt(this.color.g);
       var b = parseInt(this.color.b);
 
-      // var _log = '';
+      var _log = '';
 
-      // if(!this._prevColor || this._prevColor.r != this.color.r || this._prevColor.g != this.color.g || this._prevColor.b != this.color.b){
+      if(!displayObject._render._chachedFilteredData || !this._prevColor || this._prevColor.r != this.color.r || this._prevColor.g != this.color.g || this._prevColor.b != this.color.b){
         for (var i = 0; i < origin.width; i ++){
           for (var j = 0; j < origin.height; j ++){
             var r_0 = origin.data [inpos++];
@@ -834,8 +846,8 @@ GoldenGraphics.BaseTexture.cache = {};
             if (a_0 > 0){
 
               target.data [pos] = r * origin.data [pos] / 255;
-              // _log += target.data [pos] + ' ';
               pos ++;
+              // _log += r + ' ';
               target.data [pos] = g * origin.data [pos] / 255;
               pos ++;
               target.data [pos] = b * origin.data [pos] / 255;
@@ -851,18 +863,23 @@ GoldenGraphics.BaseTexture.cache = {};
 
         // console.log(_log);
 
-      //   if(this._prevColor){
-      //     this._prevColor.r = this.color.r;
-      //     this._prevColor.g = this.color.g;
-      //     this._prevColor.b = this.color.b;
-      //     this._prevColor.a = this.color.a;
-      //   }
-      //   else{
-      //     this._prevColor = new GoldenGraphics.Color(this.color.r, this.color.g, this.color.b, this.color.a);
-      //   }
+        if(this._prevColor){
+          this._prevColor.r = this.color.r;
+          this._prevColor.g = this.color.g;
+          this._prevColor.b = this.color.b;
+          this._prevColor.a = this.color.a;
+        }
+        else{
+          this._prevColor = new GoldenGraphics.Color(this.color.r, this.color.g, this.color.b, this.color.a);
+        }
+
+        displayObject._render._chachedFilteredData = target;
 
 
-      // }
+      }
+
+
+      displayObject._render._context.putImageData(displayObject._render._chachedFilteredData || origin, 0, 0);
 
     }
   });

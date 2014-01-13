@@ -7,10 +7,11 @@
     var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
 
     // The base Class implementation (does nothing)
-    this.Class = function(){};
+    GoldenGraphics.Class = function(){};
+    GoldenGraphics.Class.prototype = {};
 
     // Create a new Class that inherits from this class
-    Class.extend = function(prop) {
+    GoldenGraphics.Class.extend = function(prop) {
       var _super = this.prototype;
 
       // Instantiate a base class (but only create the instance,

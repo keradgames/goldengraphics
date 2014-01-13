@@ -132,11 +132,9 @@
     _applyFilters : function(displayObject){
       for(var i in displayObject.filters){
         if(displayObject.filters.hasOwnProperty(i)){
-          var imageData = displayObject._render._context.getImageData(0, 0, displayObject._render._canvas.width, displayObject._render._canvas.height);
-          var filteredImageData = displayObject._render._context.createImageData(imageData);
+          displayObject._render = displayObject._render || {};
 
-          displayObject.filters[i].apply(imageData, filteredImageData);
-          displayObject._render._context.putImageData(filteredImageData, 0, 0);
+          displayObject.filters[i].apply(displayObject);
         }
       }
     },

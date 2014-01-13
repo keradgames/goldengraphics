@@ -72,20 +72,24 @@
         renderer.resize(600, 400);
 
         var player = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
-        // player.filters = [new GoldenGraphics.filters.TintFilter(130, 50, 0)];
-        // player.position.x = 300;
+        player.filters = [new GoldenGraphics.filters.TintFilter(255, 0, 0)];
+
+        var player2 = GoldenGraphics.Sprite.fromImageUrl('media/img/player_01.png');
+        player2.filters = [new GoldenGraphics.filters.TintFilter(0, 255, 0)];
+        player2.position.x = 50;
 
         var tshirt = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_01.png');
-        // tshirt.position.x = 50;
-        // tshirt.opacity = 0;
-        tshirt.filters = [new GoldenGraphics.filters.TintFilter(130, 0, 50)];
+        tshirt.position.x = 50;
+        tshirt.opacity = 0.5;
+        // tshirt.filters = [new GoldenGraphics.filters.TintFilter(130, 0, 50)];
 
 
         var tshirt_detail = GoldenGraphics.Sprite.fromImageUrl('media/img/tshirt_02.png');
-        // tshirt_detail.position.x = -50;
-        tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
+        tshirt_detail.position.x = -50;
+        // tshirt_detail.filters = [new GoldenGraphics.filters.TintFilter(0, 0, 150)];
 
 
+        stage.addChild(player2);
         stage.addChild(player);
         player.addChild(tshirt);
         player.addChild(tshirt_detail);

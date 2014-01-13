@@ -28,6 +28,11 @@
         this._addChildToStage(child);
       }
 
+      // TODO remove dependence on render
+      if(this._render && this._render._chachedFilteredData){
+        this._render._chachedFilteredData = null;
+      }
+
     },
 
     removeChild : function(child){
@@ -35,6 +40,11 @@
         this.children.splice(this.children.indexOf(child), 1);
         this._removeChildFromStage(child);
         child.parent = null;
+
+        // TODO remove dependence on render
+        if(this._render && this._render._chachedFilteredData){
+          this._render._chachedFilteredData = null;
+        }
 
         // clear render
         // this.

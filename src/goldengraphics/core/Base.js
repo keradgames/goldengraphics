@@ -1,5 +1,5 @@
 // CORE
 
-  GoldenGraphics.Base = Class.extend({
+  GoldenGraphics.Base = GoldenGraphics.Class.extend({
     init : function(){}
   });

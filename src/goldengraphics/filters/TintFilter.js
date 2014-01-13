@@ -17,7 +17,10 @@
       this._prevColor = null;
     },
 
-    apply: function(origin, target) {
+    apply: function(displayObject) {
+      var origin = displayObject._render._context.getImageData(0, 0, displayObject._render._canvas.width, displayObject._render._canvas.height);
+      var target = displayObject._render._context.createImageData(origin);
+
       var pos = 0;
       var inpos = 0;
 
@@ -25,9 +28,9 @@
       var g = parseInt(this.color.g);
       var b = parseInt(this.color.b);
 
-      // var _log = '';
+      var _log = '';
 
-      // if(!this._prevColor || this._prevColor.r != this.color.r || this._prevColor.g != this.color.g || this._prevColor.b != this.color.b){
+      if(!displayObject._render._chachedFilteredData || !this._prevColor || this._prevColor.r != this.color.r || this._prevColor.g != this.color.g || this._prevColor.b != this.color.b){
         for (var i = 0; i < origin.width; i ++){
           for (var j = 0; j < origin.height; j ++){
             var r_0 = origin.data [inpos++];
@@ -38,8 +41,8 @@
             if (a_0 > 0){
 
               target.data [pos] = r * origin.data [pos] / 255;
-              // _log += target.data [pos] + ' ';
               pos ++;
+              // _log += r + ' ';
               target.data [pos] = g * origin.data [pos] / 255;
               pos ++;
               target.data [pos] = b * origin.data [pos] / 255;
@@ -55,18 +58,23 @@
 
         // console.log(_log);
 
-      //   if(this._prevColor){
-      //     this._prevColor.r = this.color.r;
-      //     this._prevColor.g = this.color.g;
-      //     this._prevColor.b = this.color.b;
-      //     this._prevColor.a = this.color.a;
-      //   }
-      //   else{
-      //     this._prevColor = new GoldenGraphics.Color(this.color.r, this.color.g, this.color.b, this.color.a);
-      //   }
+        if(this._prevColor){
+          this._prevColor.r = this.color.r;
+          this._prevColor.g = this.color.g;
+          this._prevColor.b = this.color.b;
+          this._prevColor.a = this.color.a;
+        }
+        else{
+          this._prevColor = new GoldenGraphics.Color(this.color.r, this.color.g, this.color.b, this.color.a);
+        }
+
+        displayObject._render._chachedFilteredData = target;
 
 
-      // }
+      }
+
+
+      displayObject._render._context.putImageData(displayObject._render._chachedFilteredData || origin, 0, 0);
 
     }
   });
