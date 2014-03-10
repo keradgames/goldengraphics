@@ -486,7 +486,13 @@ GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
             if (child._render._imageToRender) {
               displayObject._render._context.setTransform(child.scale.x, 0, 0, child.scale.y, child.position.x, child.position.y);
               displayObject._render._context.globalAlpha = child.opacity;
-              displayObject._render._context.drawImage(child._render._imageToRender, 0, 0, child._render._imageToRender.width, child._render._imageToRender.height);
+              displayObject._render._context.drawImage(
+                child._render._imageToRender,
+                child.anchor.x * -child._render._imageToRender.width,
+                child.anchor.y * -child._render._imageToRender.height,
+                child._render._imageToRender.width,
+                child._render._imageToRender.height
+              );
               displayObject._render._context.restore();
             }
           }
@@ -590,6 +596,7 @@ GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
     this.imageData = null;
     this.position = new GoldenGraphics.Point2D();
     this.scale = new GoldenGraphics.Point2D(1, 1);
+    this.anchor = new GoldenGraphics.Point2D(0, 0);
     this.opacity = 1;
     this.parent = null;
 

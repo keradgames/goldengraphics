@@ -7,6 +7,7 @@ GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
     this.imageData = null;
     this.position = new GoldenGraphics.Point2D();
     this.scale = new GoldenGraphics.Point2D(1, 1);
+    this.anchor = new GoldenGraphics.Point2D(0, 0);
     this.opacity = 1;
     this.parent = null;
 
