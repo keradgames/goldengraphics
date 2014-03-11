@@ -10,7 +10,8 @@ GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
     this.anchor = new GoldenGraphics.Point2D(0, 0);
     this.opacity = 1;
     this.parent = null;
-
+    this.width = 0;
+    this.height = 0;
   },
 
   addChild: function(child) {
@@ -29,6 +30,9 @@ GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
       child.parent = this;
       this._addChildToStage(child);
     }
+
+    this.width = Math.max(this.width, child.width);
+    this.height = Math.max(this.height, child.height);
 
     // TODO remove dependence on render
     if (this._render && this._render._chachedFilteredData) {

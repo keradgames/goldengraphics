@@ -1,5 +1,5 @@
 // Copyright (c) 2014 Kerad Games S. L. 
- // goldengraphics 2014-03-10 
+ // goldengraphics 2014-03-11 
   /* The MIT License (MIT) 
  
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
@@ -453,6 +453,8 @@ GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
 
     var x = 0;
     var y = 0;
+    var width;
+    var height;
 
 
     var _log = "";
@@ -465,11 +467,25 @@ GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
       if (!displayObject._render._canvas) {
         this._createTextureCanvas(displayObject);
       } else {
-        displayObject._render._context.clearRect(0, 0, displayObject._render._canvas.width, displayObject._render._canvas.height);
+        displayObject._render._context.clearRect(-displayObject._render._canvas.width, -displayObject._render._canvas.height,
+          displayObject._render._canvas.width * 2,
+          displayObject._render._canvas.height * 2
+        );
       }
 
       if (displayObject.texture) {
-        displayObject._render._context.drawImage(displayObject.texture, 0, 0, displayObject.texture.width, displayObject.texture.height);
+        displayObject._render._context.drawImage(
+          displayObject.texture,
+          0,
+          0,
+          displayObject.texture.width,
+          displayObject.texture.height
+        );
+      } else {
+        width = displayObject.width || this.canvas.width / displayObject.scale.x;
+        height = displayObject.height || this.canvas.height / displayObject.scale.y;
+        width = displayObject._render._canvas.width;
+        height = displayObject._render._canvas.height;
       }
 
       // for each child
@@ -488,8 +504,8 @@ GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
               displayObject._render._context.globalAlpha = child.opacity;
               displayObject._render._context.drawImage(
                 child._render._imageToRender,
-                child.anchor.x * -child._render._imageToRender.width,
-                child.anchor.y * -child._render._imageToRender.height,
+                child.anchor.x * -displayObject.width,
+                child.anchor.y * -displayObject.height,
                 child._render._imageToRender.width,
                 child._render._imageToRender.height
               );
@@ -531,8 +547,8 @@ GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
       displayObject._render._canvas.width = displayObject.texture.width;
       displayObject._render._canvas.height = displayObject.texture.height;
     } else {
-      displayObject._render._canvas.width = this.canvas.width;
-      displayObject._render._canvas.height = this.canvas.height;
+      displayObject._render._canvas.width = displayObject.width || this.canvas.width / displayObject.scale.x;
+      displayObject._render._canvas.height = displayObject.height || this.canvas.height / displayObject.scale.y;
     }
   },
 
@@ -599,7 +615,8 @@ GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
     this.anchor = new GoldenGraphics.Point2D(0, 0);
     this.opacity = 1;
     this.parent = null;
-
+    this.width = 0;
+    this.height = 0;
   },
 
   addChild: function(child) {
@@ -618,6 +635,9 @@ GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
       child.parent = this;
       this._addChildToStage(child);
     }
+
+    this.width = Math.max(this.width, child.width);
+    this.height = Math.max(this.height, child.height);
 
     // TODO remove dependence on render
     if (this._render && this._render._chachedFilteredData) {
@@ -765,22 +785,27 @@ GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
   // SPRITE
 
   GoldenGraphics.Sprite = GoldenGraphics.DisplayObjectContainer.extend({
-    init: function(image){
+    init: function(image) {
       this._super();
 
       var _this = this;
       this.cachedImageData = null;
       // this.texture = null;
 
-      if(image.complete){
+      if (image.complete) {
         onImageLoad();
-      }
-      else{
+      } else {
         image.addEventListener("load", onImageLoad);
       }
 
-      function onImageLoad (){
+      function onImageLoad() {
         _this.texture = image;
+        _this.width = Math.max(_this.width, _this.texture.width);
+        _this.height = Math.max(_this.height, _this.texture.height);
+        if (_this.parent) {
+          _this.parent.width = Math.max(_this.width, _this.parent.width);
+          _this.parent.height = Math.max(_this.height, _this.parent.height);
+        }
       }
 
     }
@@ -788,11 +813,11 @@ GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
 
   // Static functions and properties
 
-  GoldenGraphics.Sprite.fromImageUrl = function(url){
+  GoldenGraphics.Sprite.fromImageUrl = function(url) {
     var image = GoldenGraphics.BaseTexture.cache[url] || new Image();
     var sprite = null;
 
-    if(!image.src){
+    if (!image.src) {
       image.src = url;
     }
 
@@ -800,7 +825,6 @@ GoldenGraphics.DisplayObjectContainer = GoldenGraphics.Base.extend({
 
     return sprite;
   }
-
   // TintFilter (color)
   // TintFilter (r, g, b, a)
 

@@ -42,6 +42,8 @@ GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
 
     var x = 0;
     var y = 0;
+    var width;
+    var height;
 
 
     var _log = "";
@@ -54,11 +56,25 @@ GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
       if (!displayObject._render._canvas) {
         this._createTextureCanvas(displayObject);
       } else {
-        displayObject._render._context.clearRect(0, 0, displayObject._render._canvas.width, displayObject._render._canvas.height);
+        displayObject._render._context.clearRect(-displayObject._render._canvas.width, -displayObject._render._canvas.height,
+          displayObject._render._canvas.width * 2,
+          displayObject._render._canvas.height * 2
+        );
       }
 
       if (displayObject.texture) {
-        displayObject._render._context.drawImage(displayObject.texture, 0, 0, displayObject.texture.width, displayObject.texture.height);
+        displayObject._render._context.drawImage(
+          displayObject.texture,
+          0,
+          0,
+          displayObject.texture.width,
+          displayObject.texture.height
+        );
+      } else {
+        width = displayObject.width || this.canvas.width / displayObject.scale.x;
+        height = displayObject.height || this.canvas.height / displayObject.scale.y;
+        width = displayObject._render._canvas.width;
+        height = displayObject._render._canvas.height;
       }
 
       // for each child
@@ -77,8 +93,8 @@ GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
               displayObject._render._context.globalAlpha = child.opacity;
               displayObject._render._context.drawImage(
                 child._render._imageToRender,
-                child.anchor.x * -child._render._imageToRender.width,
-                child.anchor.y * -child._render._imageToRender.height,
+                child.anchor.x * -displayObject.width,
+                child.anchor.y * -displayObject.height,
                 child._render._imageToRender.width,
                 child._render._imageToRender.height
               );
@@ -120,8 +136,8 @@ GoldenGraphics.CanvasRenderer = GoldenGraphics.Base.extend({
       displayObject._render._canvas.width = displayObject.texture.width;
       displayObject._render._canvas.height = displayObject.texture.height;
     } else {
-      displayObject._render._canvas.width = this.canvas.width;
-      displayObject._render._canvas.height = this.canvas.height;
+      displayObject._render._canvas.width = displayObject.width || this.canvas.width / displayObject.scale.x;
+      displayObject._render._canvas.height = displayObject.height || this.canvas.height / displayObject.scale.y;
     }
   },
 
