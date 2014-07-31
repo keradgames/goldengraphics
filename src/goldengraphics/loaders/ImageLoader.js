@@ -33,7 +33,9 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
       this.onLoaded();
     }
     else{
+      var xhr = new XMLHttpRequest();
       this.img = new Image();
+
       this.img.addEventListener("load", function(){
         GoldenGraphics.BaseTexture.cache[_this.url] = _this.img;
         _this.onLoaded();
@@ -43,7 +45,17 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
         _this.onError();
       });
 
-      this.img.src = this.url;
+      xhr.onload = function(){
+        var url = window.URL || window.webkitURL;
+        _this.img.src = url.createObjectURL(this.response);
+      }
+
+      xhr.open('GET', this.url, true);
+      xhr.responseType = 'blob';
+      xhr.onerror = function(error) {
+        _this.onError();
+      }
+      xhr.send();
     }
 
   },

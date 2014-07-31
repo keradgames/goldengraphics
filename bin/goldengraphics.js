@@ -1,5 +1,5 @@
 // Copyright (c) 2014 Kerad Games S. L. 
- // goldengraphics 2014-05-28 
+ // goldengraphics 2014-07-16 
   /* The MIT License (MIT) 
  
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
@@ -287,7 +287,9 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
       this.onLoaded();
     }
     else{
+      var xhr = new XMLHttpRequest();
       this.img = new Image();
+
       this.img.addEventListener("load", function(){
         GoldenGraphics.BaseTexture.cache[_this.url] = _this.img;
         _this.onLoaded();
@@ -297,7 +299,17 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
         _this.onError();
       });
 
-      this.img.src = this.url;
+      xhr.onload = function(){
+        var url = window.URL || window.webkitURL;
+        _this.img.src = url.createObjectURL(this.response);
+      }
+
+      xhr.open('GET', this.url, true);
+      xhr.responseType = 'blob';
+      xhr.onerror = function(error) {
+        _this.onError();
+      }
+      xhr.send();
     }
 
   },
