@@ -1,5 +1,5 @@
 // Copyright (c) 2014 Kerad Games S. L. 
- // goldengraphics 2014-07-16 
+ // goldengraphics 2014-08-22 
   /* The MIT License (MIT) 
  
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
@@ -268,7 +268,7 @@ PIXI.EventTarget = function () {
  * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
  */
 GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
-  init: function(url, crossorigin){
+  init: function(url, crossorigin) {
     PIXI.EventTarget.call(this);
     this.url = url;
   },
@@ -278,40 +278,42 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
    *
    * @method load
    */
-  load: function(){
-    // TODO cache textures
-    var _this = this;
+  load: function() {
+    var cachedImg;
 
-    if(GoldenGraphics.BaseTexture.cache[this.url]){
-      this.img = GoldenGraphics.BaseTexture.cache[this.url];
+    // if texture is loaded, get it from textures cache
+    if (cachedImg = GoldenGraphics.BaseTexture.cache[this.url]) {
+      this.img = cachedImg;
       this.onLoaded();
-    }
-    else{
+    } else if (cachedImg = GoldenGraphics.ImageLoader._assets_cache_[this.url]) {
+      // if texture has been request but it's not loaded yet, avoid duplicated request
+      cachedImg.addEventListener("load", this.onLoaded.bind(this));
+      cachedImg.addEventListener("error", this.onError.bind(this));
+    } else {
       var xhr = new XMLHttpRequest();
       this.img = new Image();
 
-      this.img.addEventListener("load", function(){
-        GoldenGraphics.BaseTexture.cache[_this.url] = _this.img;
-        _this.onLoaded();
-      });
+      GoldenGraphics.ImageLoader._assets_cache_[this.url] = this.img;
 
-      this.img.addEventListener("error", function(){
-        _this.onError();
-      });
+      this.img.addEventListener("load", function() {
+        GoldenGraphics.BaseTexture.cache[this.url] = this.img;
+        this.onLoaded();
+      }.bind(this));
 
-      xhr.onload = function(){
+      this.img.addEventListener("error", this.onError.bind(this));
+
+      xhr.onload = function() {
         var url = window.URL || window.webkitURL;
-        _this.img.src = url.createObjectURL(this.response);
-      }
+        this.img.src = url.createObjectURL(xhr.response);
+      }.bind(this);
 
       xhr.open('GET', this.url, true);
       xhr.responseType = 'blob';
       xhr.onerror = function(error) {
-        _this.onError();
-      }
+        this.onError();
+      }.bind(this);
       xhr.send();
     }
-
   },
 
   /**
@@ -320,8 +322,11 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
    * @method onLoaded
    * @private
    */
-  onLoaded: function(){
-    this.dispatchEvent({type: "loaded", content: this});
+  onLoaded: function() {
+    this.dispatchEvent({
+      type: "loaded",
+      content: this
+    });
   },
 
   /**
@@ -330,13 +335,20 @@ GoldenGraphics.ImageLoader = GoldenGraphics.Base.extend({
    * @method onError
    * @private
    */
-  onError: function(){
-    this.dispatchEvent({type: "error", content: this});
+  onError: function() {
+    this.dispatchEvent({
+      type: "error",
+      content: this
+    });
   }
 
-})
+});
 
-
+/**
+ * A static cache for all the requested assets.
+ * @type {Object}
+ */
+GoldenGraphics.ImageLoader._assets_cache_ = {};
 /**
  * Derived from PIXI.AssetLoader @author Mat Groves http://matgroves.com/ @Doormat23
  */
