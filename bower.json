@@ -1,0 +1,14 @@
+{
+  "name": "goldengraphics",
+  "version": "0.2.0",
+  "homepage": "https://github.com/keradgames/goldengraphics",
+  "description": "Graphics Library by Kerad Games",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
