@@ -3,11 +3,14 @@
   "homepage": "https://github.com/keradgames/goldengraphics",
   "description": "Graphics Library by Kerad Games",
   "license": "MIT",
+  "main": "bin/goldengraphics.js",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "examples",
+    "src"
   ]
 }
