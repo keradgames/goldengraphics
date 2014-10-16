@@ -1,5 +1,5 @@
 // Copyright (c) 2014 Kerad Games S. L. 
- // goldengraphics 2014-08-22 
+ // goldengraphics 2014-10-16 
   /* The MIT License (MIT) 
  
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
@@ -216,19 +216,29 @@ PIXI.EventTarget = function () {
     return '#' + r + g + b;
   };
 
+  /**
+   * Given at least two color values and a factor value between 0 and 1,
+   * returns the color value that corresponds to the factor in a gradient scale
+   * between those colors.
+   * @param  {Color} color1: start point gradient color
+   * @param  {Color} color2: end point gradient color
+   * @param  {Number} factor: value between 0 and 1
+   * @param  {Array} stopColors: an array of colors with intermediary colors in the gradient
+   * @return {Color}
+   */
   GoldenGraphics.Color.gradientPoint = function(color1, color2, factor, stopColors) {
     var gradientColor = new GoldenGraphics.Color();
 
-    if (factor === 0) {
+    if (!factor || factor < 0) {
       return color1.clone();
-    } else if (factor === 1) {
+    } else if (factor >= 1) {
       return color2.clone();
     }
 
     var colors = [color1];
     var index = 0;
     var partialFactor = 0;
-    if (stopColors) {
+    if (stopColors && stopColors.length) {
       colors = colors.concat(stopColors);
       colors.push(color2);
       partialFactor = factor * (colors.length - 1);

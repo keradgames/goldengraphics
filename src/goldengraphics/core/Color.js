@@ -56,19 +56,29 @@
     return '#' + r + g + b;
   };
 
+  /**
+   * Given at least two color values and a factor value between 0 and 1,
+   * returns the color value that corresponds to the factor in a gradient scale
+   * between those colors.
+   * @param  {Color} color1: start point gradient color
+   * @param  {Color} color2: end point gradient color
+   * @param  {Number} factor: value between 0 and 1
+   * @param  {Array} stopColors: an array of colors with intermediary colors in the gradient
+   * @return {Color}
+   */
   GoldenGraphics.Color.gradientPoint = function(color1, color2, factor, stopColors) {
     var gradientColor = new GoldenGraphics.Color();
 
-    if (factor === 0) {
+    if (!factor || factor < 0) {
       return color1.clone();
-    } else if (factor === 1) {
+    } else if (factor >= 1) {
       return color2.clone();
     }
 
     var colors = [color1];
     var index = 0;
     var partialFactor = 0;
-    if (stopColors) {
+    if (stopColors && stopColors.length) {
       colors = colors.concat(stopColors);
       colors.push(color2);
       partialFactor = factor * (colors.length - 1);
